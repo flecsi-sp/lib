@@ -1,0 +1,4 @@
+/build
+
+# exclude compiled Python files due to Spack repo
+*.pyc

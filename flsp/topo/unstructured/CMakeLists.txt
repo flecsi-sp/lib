@@ -1,0 +1,44 @@
+flsp_sources(
+  io/x3d_definition.cc
+)
+
+flsp_headers(
+  config.hh
+  models.hh
+  io/definition_base.hh
+  io/detail/exodus.hh
+  io/exodus_definition.hh
+  io/simple_definition.hh
+  io/x3d_definition.hh
+  mesh/coloring_functors.hh
+  mesh/coloring_utils.hh
+  mesh/types.hh
+  util/common.hh
+  util/factory.hh
+)
+
+set(COLORING_INPUTS
+  ${FLSP_DATA_DIR}/mesh/3d/mesh3d-8x8x8.exo
+  ${FLSP_DATA_DIR}/mesh/3d/mesh3d-8x8x8.x3d
+  ${FLSP_DATA_DIR}/mesh/3d/mesh3d-8x8x8.mat1
+  ${FLSP_DATA_DIR}/mesh/3d/mesh3d-8x8x8.mat2
+  ${FLSP_DATA_DIR}/mesh/3d/mesh3d-2x2x2.x3d
+  ${FLSP_DATA_DIR}/mesh/3d/mesh3d-2x2x2.msh
+  ${FLSP_DATA_DIR}/mesh/2d/mesh2d-8x8.msh
+  ${FLSP_DATA_DIR}/mesh/2d/mesh2d-8x8.x3d
+  ${FLSP_DATA_DIR}/mesh/2d/mesh2d-8x8.mat1
+  ${FLSP_DATA_DIR}/mesh/2d/mesh2d-8x8.mat2
+  ${FLSP_DATA_DIR}/mesh/2d/mesh2d-8x8.bnd1
+  ${FLSP_DATA_DIR}/mesh/2d/mesh2d-8x8.bnd2
+  ${FLSP_DATA_DIR}/mesh/2d/mesh2d-8x8.bnd3
+  ${FLSP_DATA_DIR}/mesh/2d/mesh2d-8x8.bnd4
+)
+
+flsp_add_unit(new
+  SOURCES
+    mesh/test/new.cc
+  LIBRARIES
+    FleCSI-SP::FleCSI-SP
+  INPUTS
+    ${COLORING_INPUTS}
+)
