@@ -22,7 +22,24 @@ cmake_policy(SET CMP0167 NEW) # FindBoost
 # Project.
 #------------------------------------------------------------------------------#
 
-project(FleCSI-SP LANGUAGES NONE)
+project(FleCSI-SP LANGUAGES C CXX)
+option(BUILD_SHARED_LIBS "Build shared libs" ON)
+mark_as_advanced(BUILD_SHARED_LIBS)
+
+set(CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+set(default_build_type "Debug")
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  message(STATUS
+    "Setting build type to '${default_build_type}' as none was specified.")
+  set(CMAKE_BUILD_TYPE "${default_build_type}" CACHE
+      STRING "Choose the type of build." FORCE)
+  # Set the possible values of build type for cmake-gui
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
+    "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+endif()
 
 #------------------------------------------------------------------------------#
 # FleCSI-SP Version
@@ -31,47 +48,97 @@ project(FleCSI-SP LANGUAGES NONE)
 include(version)
 
 #------------------------------------------------------------------------------#
+# Find the FleCSI package. This must be done early so that the FleCSI cmake
+# packages will be available to the project, e.g., 'include(FleCSI/format)'.
+#
+# CMake documentation for FleCSI client applications is included in the
+# FleCSI userguide.
+#------------------------------------------------------------------------------#
+
+if(NOT FleCSI_FOUND)
+  find_package(FleCSI 2 REQUIRED)
+endif()
+
+#------------------------------------------------------------------------------#
+# Formatting
+#------------------------------------------------------------------------------#
+
+option(ENABLE_FORMAT "Enable format target" OFF)
+mark_as_advanced(ENABLE_FORMAT)
+
+if(ENABLE_FORMAT)
+  include(FleCSI/format)
+
+  set(CLANG_FORMAT_VERSION "13...<14" CACHE STRING
+      "Set the required version (major[.minor[.patch]]) of clang-format")
+  mark_as_advanced(CLANG_FORMAT_VERSION)
+
+  flecsi_add_format_target(${PROJECT_NAME} ${PROJECT_SOURCE_DIR} "${CLANG_FORMAT_VERSION}")
+endif()
+
+#------------------------------------------------------------------------------#
+# Documentation
+#------------------------------------------------------------------------------#
+
+set(GITHUB_PAGES_REPO "git@github.com:flecsi-sp/lib.git"
+  CACHE STRING "Pages repository for pages branch")
+option(ENABLE_DOCUMENTATION "Enable documentation" OFF)
+mark_as_advanced(GITHUB_PAGES_REPO)
+mark_as_advanced(ENABLE_DOCUMENTATION)
+
+if(ENABLE_DOCUMENTATION)
+  include(FleCSI/documentation)
+
+  option(ENABLE_DOXYGEN "Enable Doxygen documentation" ON)
+  option(ENABLE_SPHINX  "Enable Sphinx documentation"  ON)
+  mark_as_advanced(ENABLE_DOXYGEN)
+  mark_as_advanced(ENABLE_SPHINX)
+
+  if(ENABLE_DOXYGEN)
+    include(FleCSI/doxygen)
+
+    # Create Doxygen output directory eagerly to avoid race condition.
+    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/doc/api)
+
+    flecsi_add_doxygen_target(user
+      CONFIGS
+        ${CMAKE_SOURCE_DIR}/doc/doxygen/user.conf.in
+        ${CMAKE_SOURCE_DIR}/doc/doxygen/conf.in
+    )
+  endif()
+
+  if(ENABLE_SPHINX)
+    include(FleCSI/sphinx)
+
+    flecsi_add_sphinx_target(main
+      CONFIG ${CMAKE_SOURCE_DIR}/doc/sphinx
+      OUTPUT ${CMAKE_BINARY_DIR}/doc
+    )
+
+    # This is for local install of the documentation. To deploy the
+    # documentation to the flecsi website, use the "deploy-documentation"
+    # target.
+    install(
+      DIRECTORY
+        ${CMAKE_BINARY_DIR}/doc/
+      DESTINATION
+        ${CMAKE_INSTALL_PREFIX}/share/doc/FleCSI-SP
+      OPTIONAL
+    )
+  endif()
+
+  if((NOT GITHUB_PAGES_REPO STREQUAL "") AND ENABLE_SPHINX AND ENABLE_DOXYGEN)
+    flecsi_add_doc_deployment(deploy-docs GITHUB_PAGES_REPO ${GITHUB_PAGES_REPO})
+  endif()
+endif()
+
+#------------------------------------------------------------------------------#
 # FleCSI Library
 #------------------------------------------------------------------------------#
 option(ENABLE_LIBRARY "Enable build of FleCSI-SP library" ON)
 mark_as_advanced(ENABLE_LIBRARY)
 
 if(ENABLE_LIBRARY)
-  #----------------------------------------------------------------------------#
-  # Build shared libraries by default
-  #----------------------------------------------------------------------------#
-  option(BUILD_SHARED_LIBS "Build shared libs" ON)
-  mark_as_advanced(BUILD_SHARED_LIBS)
-
-  enable_language(CXX)
-  enable_language(C)
-  set(CXX_STANDARD_REQUIRED ON)
-  set(CMAKE_CXX_STANDARD 20)
-  set(CMAKE_CXX_EXTENSIONS OFF)
-
-  set(default_build_type "Debug")
-  if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-    message(STATUS
-      "Setting build type to '${default_build_type}' as none was specified.")
-    set(CMAKE_BUILD_TYPE "${default_build_type}" CACHE
-        STRING "Choose the type of build." FORCE)
-    # Set the possible values of build type for cmake-gui
-    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
-      "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
-  endif()
-
-  #------------------------------------------------------------------------------#
-  # Find the FleCSI package. This must be done early so that the FleCSI cmake
-  # packages will be available to the project, e.g., 'include(FleCSI/format)'.
-  #
-  # CMake documentation for FleCSI client applications is included in the
-  # FleCSI userguide.
-  #------------------------------------------------------------------------------#
-
-  if(NOT FleCSI_FOUND)
-    find_package(FleCSI 2 REQUIRED)
-  endif()
-
   #----------------------------------------------------------------------------#
   # Define options and includes.
   #----------------------------------------------------------------------------#
@@ -126,7 +193,7 @@ if(ENABLE_LIBRARY)
     
   install(
     FILES ${CMAKE_BINARY_DIR}/flsp/config.hh
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/flsp
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/flecsi-sp
   )
 
   #------------------------------------------------------------------------------#
@@ -187,6 +254,26 @@ if(ENABLE_LIBRARY)
   add_subdirectory(flsp)
 
   #----------------------------------------------------------------------------#
+  # Install
+  #----------------------------------------------------------------------------#
+  install(TARGETS FleCSI-SP
+    EXPORT
+      FleCSISPTargets
+    DESTINATION
+      ${CMAKE_INSTALL_LIBDIR}
+    FILE_SET public_headers DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/flecsi-sp
+  )
+
+  install(EXPORT FleCSISPTargets
+    FILE
+    FleCSISPTargets.cmake
+    NAMESPACE
+      FleCSI-SP::
+    DESTINATION
+      ${CMAKE_INSTALL_LIBDIR}/cmake/FleCSI-SP
+  )
+
+  #----------------------------------------------------------------------------#
   # Version
   #----------------------------------------------------------------------------#
   set_target_properties(FleCSI-SP
@@ -196,7 +283,7 @@ if(ENABLE_LIBRARY)
 
   include(CMakePackageConfigHelpers)
   write_basic_package_version_file(
-    ${CMAKE_CURRENT_BINARY_DIR}/FleCSSPIConfigVersion.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/FleCSISPConfigVersion.cmake
     VERSION ${FleCSI_SP_VERSION}
     COMPATIBILITY AnyNewerVersion
   )

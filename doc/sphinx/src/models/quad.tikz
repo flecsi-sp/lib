@@ -1,0 +1,22 @@
+\begin{tikzpicture}[
+  pt/.style={black!20, draw=black, thick}]
+
+  \coordinate (a) at (4, 0);
+  \coordinate (b) at (4, 4);
+  \coordinate (c) at (0, 4);
+  \coordinate (d) at (0, 0);
+
+  \draw (8,4)   node   {Edge 0: \{0, 1\}};
+  \draw (8,3.5) node   {Edge 1: \{1, 2\}};
+  \draw (8,3)   node   {Edge 2: \{3, 4\}};
+  \draw (8,2.5) node   {Edge 3: \{4, 0\}};
+
+  \draw[thick] (a) -- (b) -- (c) -- (d) -- cycle;
+
+  \fill[pt] (a) circle (3pt) node [black, below right] {$0$};
+  \fill[pt] (b) circle (3pt) node [black, above right] {$1$};
+  \fill[pt] (c) circle (3pt) node [black, above left] {$2$};
+  \fill[pt] (d) circle (3pt) node [black, below left] {$3$};
+\end{tikzpicture}
+
+% vim: syntax=tex:

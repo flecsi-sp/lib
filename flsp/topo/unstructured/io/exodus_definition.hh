@@ -92,11 +92,10 @@ struct exodus_definition : definition_base<D> {
     util::crs & inter) const;
 
   util::gid num_entities(entity_kind<D> k) const override {
-    flog_assert(
-      k == entity_kind<D>::cells || k == entity_kind<D>::vertices,
+    flog_assert(k == entity_kind<D>::cells || k == entity_kind<D>::vertices,
       "invalid entity_kind");
     return k == entity_kind<D>::vertices ? exo_params.num_nodes
-                                               : exo_params.num_elem;
+                                         : exo_params.num_elem;
   }
 
   std::tuple<std::vector<util::point<D>>, std::optional<bnd_ids>> vertex_data(
@@ -370,6 +369,6 @@ const inline bool register_exodus_2d_ =
 const inline bool register_exodus_3d_ =
   io_factory<3>::instance().register_type("exo", exodus_handler<3>);
 
-} // namespace burton::io
+} // namespace flsp::topo::unstructured::io
 
 #endif // FLSP_TOPO_UNSTRUCTURED_IO_EXODUS_DEFINITION_HH

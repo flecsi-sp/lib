@@ -55,8 +55,7 @@ struct simple_definition : definition_base<D> {
   }
 
   util::gid num_entities(entity_kind<D> k) const override {
-    flog_assert(
-      k == entity_kind<D>::cells || k == entity_kind<D>::vertices,
+    flog_assert(k == entity_kind<D>::cells || k == entity_kind<D>::vertices,
       "invalid entity_kind");
     return k == entity_kind<D>::vertices ? num_vertices_ : num_cells_;
   } // num_entities
@@ -133,6 +132,6 @@ const inline bool register_simple_2d_ =
 const inline bool register_simple_3d_ =
   io_factory<3>::instance().register_type("msh", simple_handler<3>);
 
-} // namespace burton::io
+} // namespace flsp::topo::unstructured::io
 
 #endif // TOPO_UNSTRUCTURED_IO_SIMPLE_DEFINITION_HH

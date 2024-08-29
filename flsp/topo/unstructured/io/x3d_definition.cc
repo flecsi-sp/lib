@@ -47,4 +47,4 @@ x3d_seek::seek_nodes(std::fstream & fh) {
   node_pos = fh.tellg();
 }
 
-} // namespace burton::io
+} // namespace flsp::topo::unstructured::io

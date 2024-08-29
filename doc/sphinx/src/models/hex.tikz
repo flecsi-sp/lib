@@ -1,0 +1,51 @@
+\begin{tikzpicture}[
+  pt/.style={black!20, draw=black, thick}]
+
+  \coordinate (a) at (4, 0);
+  \coordinate (b) at (5, 1);
+  \coordinate (c) at (1, 1);
+  \coordinate (d) at (0, 0);
+  \coordinate (e) at (4, 4);
+  \coordinate (f) at (5, 5);
+  \coordinate (g) at (1, 5);
+  \coordinate (h) at (0, 4);
+
+  \draw (8,5.5) node   {Edge 0: \{0, 1\}};
+  \draw (8, 5)  node   {Edge 1: \{1, 2\}};
+  \draw (8,4.5) node   {Edge 2: \{2, 3\}};
+  \draw (8,4)   node   {Edge 3: \{3, 0\}};
+
+  \draw (8,3.5) node   {Edge 4: \{0, 4\}};
+  \draw (8,3)   node   {Edge 5: \{1, 5\}};
+  \draw (8,2.5) node   {Edge 6: \{2, 6\}};
+  \draw (8,2)   node   {Edge 7: \{3, 7\}};
+
+  \draw (8,1.5) node   {Edge 8: \{4, 5\}};
+  \draw (8, 1)  node   {Edge 9: \{5, 6\}};
+  \draw (8, .5) node   {Edge 10:\{6, 7\}};
+  \draw (8, 0)  node   {Edge 11:\{7, 4\}};
+
+  \draw (12, 5.5) node {Face 0: \{0, 3, 2, 1\}};
+  \draw (12, 5)   node {Face 1: \{0, 1, 5, 4\}};
+  \draw (12, 4.5) node {Face 2: \{1, 2, 6, 5\}};
+  \draw (12, 4)   node {Face 3: \{2, 3, 7, 6\}};
+  \draw (12, 3.5) node {Face 4: \{0, 4, 7, 3\}};
+  \draw (12, 3)   node {Face 5: \{4, 5, 6, 7\}};
+
+  \draw[thick] (a) -- (b) -- (c) -- (d) -- cycle;
+  \draw[thick] (e) -- (f) -- (g) -- (h) -- cycle;
+  \draw[thick] (d) -- (a) -- (e) -- (h) -- cycle;
+  \draw[thick] (b) -- (c) -- (g) -- (f) -- cycle;
+
+  \fill[pt] (a) circle (3pt) node [black, below right] {$0$};
+  \fill[pt] (b) circle (3pt) node [black, below right] {$1$};
+  \fill[pt] (c) circle (3pt) node [black, above left] {$2$};
+  \fill[pt] (d) circle (3pt) node [black, below left] {$3$};
+  \fill[pt] (e) circle (3pt) node [black, below right] {$4$};
+  \fill[pt] (f) circle (3pt) node [black, above right] {$5$};
+  \fill[pt] (g) circle (3pt) node [black, above left] {$6$};
+  \fill[pt] (h) circle (3pt) node [black, below left] {$7$};
+
+\end{tikzpicture}
+
+% vim: syntax=tex:

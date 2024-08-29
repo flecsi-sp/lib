@@ -419,8 +419,7 @@ protected:
   }
 
   virtual util::gid num_entities(entity_kind<D> k) const override {
-    flog_assert(k == entity_kind<D>::cells ||
-                  k == entity_kind<D>::vertices ||
+    flog_assert(k == entity_kind<D>::cells || k == entity_kind<D>::vertices ||
                   k == entity_kind<D>::faces,
       "invalid entity kind " << k);
 
@@ -618,6 +617,6 @@ const inline bool register_x3d_2d_ =
 const inline bool register_x3d_3d_ =
   io_factory<3>::instance().register_type("x3d", x3d_handler<3>);
 
-} // namespace burton::io
+} // namespace flsp::topo::unstructured::io
 
 #endif // FLSP_TOPO_UNSTRUCTURED_IO_X3D_DEFINITION_H

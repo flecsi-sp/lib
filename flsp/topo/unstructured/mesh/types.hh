@@ -36,8 +36,8 @@ struct primary_definition {
   /// Process-to-mesh id map for face definitions.
   std::vector<util::gid> f_prc2msh;
 
-  friend std::ostream &
-  operator<<(std::ostream & stream, primary_definition const & p) {
+  friend std::ostream & operator<<(std::ostream & stream,
+    primary_definition const & p) {
     stream << "Primary-to-vertex:\n" << p.p2v << std::endl;
     stream << "Primary map (processor-to-mesh):\n"
            << flecsi::flog::container{p.prc2msh} << std::endl;
@@ -56,6 +56,6 @@ struct auxiliary_definition {
   std::unordered_map<util::gid, util::id> m2p;
 }; // auxiliary_definition
 
-} // namespace burton::mesh
+} // namespace flsp::topo::unstructured::mesh
 
 #endif // FLSP_TOPO_UNSTRUCTURED_MESH_TYPES_HH

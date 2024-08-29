@@ -4,9 +4,9 @@
 #include "flsp/topo/unstructured/io/types.hh"
 #include "flsp/topo/unstructured/mesh/coloring_utils.hh"
 
-#include <flecsi/util/unit.hh>
 #include <flecsi/util/mpi.hh>
 #include <flecsi/util/parmetis.hh>
+#include <flecsi/util/unit.hh>
 
 #include <memory>
 #include <string>
@@ -16,21 +16,21 @@ namespace base = flsp::topo::unstructured;
 namespace io = base::io;
 
 template<std::size_t D>
-int coloring() {
+int
+coloring() {
   UNIT("TASK") {
     std::unique_ptr<io::definition_base<D>> md;
     std::string mesh;
 
-    if constexpr(D==1) {
+    if constexpr(D == 1) {
     }
-    else if constexpr(D==2) {
+    else if constexpr(D == 2) {
       mesh = "mesh2d-8x8.msh";
       md = io::make_definition<2>(mesh, {}, {});
     }
-    else /* D == 3 */{
+    else /* D == 3 */ {
       mesh = "mesh3d-8x8x8.x3d";
-      std::vector<std::string> mats{
-        "mesh3d-8x8x8.mat1", "mesh3d-8x8x8.mat2"};
+      std::vector<std::string> mats{"mesh3d-8x8x8.mat1", "mesh3d-8x8x8.mat2"};
       md = io::make_definition<3>(mesh, mats, {});
     }
 
@@ -83,8 +83,9 @@ int coloring() {
     /*------------------------------------------------------------------------*
       Migrate the cell data to the owning processes.
      *------------------------------------------------------------------------*/
-    auto [cells, cp2m, cm2p] = flsp::topo::unstructured::mesh::clr::migrate_cells(
-      cem, pem, cell_raw, c2v, finfo, minfo, c2c, v2c);
+    auto [cells, cp2m, cm2p] =
+      flsp::topo::unstructured::mesh::clr::migrate_cells(
+        cem, pem, cell_raw, c2v, finfo, minfo, c2c, v2c);
     /*------------------------------------------------------------------------*
       Header Information.
      *------------------------------------------------------------------------*/

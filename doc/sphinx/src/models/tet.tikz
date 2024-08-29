@@ -1,0 +1,36 @@
+\begin{tikzpicture}
+
+  \coordinate (a) at (5,0);
+  \coordinate (b) at (5.3,1.2);
+  \coordinate (c) at (3,.8);
+  \coordinate (d) at (4,2.5);
+
+  \draw (8,4)   node   {Edge 0: \{0, 1\}};
+  \draw (8,3.5) node   {Edge 1: \{1, 2\}};
+  \draw (8,3)   node   {Edge 2: \{2, 0\}};
+  \draw (8,2.5) node   {Edge 3: \{0, 3\}};
+  \draw (8,2)   node   {Edge 4: \{1, 3\}};
+  \draw (8,1.5) node   {Edge 5: \{2, 3\}};
+
+  \draw (12,4)   node   {Face 0: \{0,2,1\}};
+  \draw (12,3.5) node   {Face 1: \{0,1,3\}};
+  \draw (12,3)   node   {Face 2: \{1,2,3\}};
+  \draw (12,2.5) node   {Face 3: \{2,0,3\}};
+
+  \draw[thick] (c) -- (a) -- (d) -- cycle;
+  \draw[thick] (c) -- (a) -- (d) -- cycle;
+  \draw[thick] (a) -- (b) -- (d) -- cycle;
+  \draw[dashed] (b) -- (c);
+
+  \fill[black!20, draw=black, thick] (a) circle (3pt)
+    node[black, above right] {$0$};
+  \fill[black!20, draw=black, thick] (b) circle (3pt)
+    node[black, above right] {$1$};
+  \fill[black!20, draw=black, thick] (c) circle (3pt)
+    node[black, above left] {$2$};
+  \fill[black!20, draw=black, thick] (d) circle (3pt)
+    node[black, above right] {$3$};
+
+\end{tikzpicture}
+
+% vim: syntax=tex:

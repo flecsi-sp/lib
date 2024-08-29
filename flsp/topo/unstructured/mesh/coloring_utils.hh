@@ -2,8 +2,8 @@
 #define FLSP_TOPO_UNSTRUCTURED_MESH_CORE_UTILS_HH
 
 #include "flsp/topo/unstructured/io/definition_base.hh"
-#include "flsp/topo/unstructured/models.hh"
 #include "flsp/topo/unstructured/mesh/coloring_functors.hh"
+#include "flsp/topo/unstructured/models.hh"
 #include "flsp/topo/unstructured/util/common.hh"
 
 #include <flecsi/flog.hh>
@@ -505,8 +505,16 @@ close_cells(util::equal_map const & cem,
     } // for
 
     auto fulfilled = util::mpi::all_to_allv<communicate_cells>(
-      {fulfill, dependents, c2co, c2v, d < depth ? finfo : std::nullopt,
-        d < depth ? minfo : std::nullopt, c2c, v2c, m2p}, comm);
+      {fulfill,
+        dependents,
+        c2co,
+        c2v,
+        d < depth ? finfo : std::nullopt,
+        d < depth ? minfo : std::nullopt,
+        c2c,
+        v2c,
+        m2p},
+      comm);
 
     std::set<util::gid> lf;
     if(finfo.has_value()) {
@@ -2028,20 +2036,48 @@ add_auxiliaries(util::equal_map const & pem,
     std::tie(lc2a, la2d) = std::move(*lcn);
   }
   else {
-    std::tie(lc2a, la2d, la2a) = create_auxiliaries<D, K>(cfa, c2v, cm2p, cfam2p, aux);
+    std::tie(lc2a, la2d, la2a) =
+      create_auxiliaries<D, K>(cfa, c2v, cm2p, cfam2p, aux);
   } // if
 
   auto [acnt, a2co, aghost, aldependents, aldependencies] =
-    color_local_auxiliaries<D, K, H>(lc2a, la2d, cog2l, col2g, cfap2m,
-      cfam2p, cshr, cghst, clrng, c2co, v2co, cell_pcdata);
+    color_local_auxiliaries<D, K, H>(lc2a,
+      la2d,
+      cog2l,
+      col2g,
+      cfap2m,
+      cfam2p,
+      cshr,
+      cghst,
+      clrng,
+      c2co,
+      v2co,
+      cell_pcdata);
 
   auto [num_aux, c2a, a2d, a2a, al2g, ag2l, adependents, adependencies] =
-    color_auxiliaries<D, K>(pem, acnt, lc2a, la2d, la2a, aghost,
-      aldependents, aldependencies, cog2l, a2co);
+    color_auxiliaries<D, K>(pem,
+      acnt,
+      lc2a,
+      la2d,
+      la2a,
+      aghost,
+      aldependents,
+      aldependencies,
+      cog2l,
+      a2co);
 
-  auto aux_pcdata = close_auxiliaries(pem, cog2l, num_aux, a2co, al2g, ag2l,
-                      adependents, adependencies, clrng, cell_pcdata,
-                      vertex_pcdata, K);
+  auto aux_pcdata = close_auxiliaries(pem,
+    cog2l,
+    num_aux,
+    a2co,
+    al2g,
+    ag2l,
+    adependents,
+    adependencies,
+    clrng,
+    cell_pcdata,
+    vertex_pcdata,
+    K);
 
   return std::make_tuple(std::move(c2a),
     std::move(a2d),
@@ -2142,7 +2178,7 @@ convert_connectivity(
 }
 
 /// \}
-} // namespace burton::mesh::clr
+} // namespace flsp::topo::unstructured::mesh::clr
 /// \endcond
 
 #endif // FLSP_TOPO_UNSTRUCTURED_MESH_CORE_UTILS_HH

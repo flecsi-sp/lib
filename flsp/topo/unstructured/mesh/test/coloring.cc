@@ -1,8 +1,8 @@
+#include "flsp/topo/unstructured/config.hh"
 #include "flsp/topo/unstructured/io/exodus_definition.hh"
 #include "flsp/topo/unstructured/io/simple_definition.hh"
 #include "flsp/topo/unstructured/io/types.hh"
 #include "flsp/topo/unstructured/io/x3d_definition.hh"
-#include "flsp/topo/unstructured/config.hh"
 #include "flsp/topo/unstructured/mesh/coloring_utils.hh"
 #include "flsp/topo/unstructured/util/common.hh"
 
@@ -50,7 +50,8 @@ coloring_test() {
       std::vector<std::string> bnd_files{};
 #endif
 
-      md = flsp::topo::unstructured::io::make_definition<D>(mesh_file, mat_files, bnd_files);
+      md = flsp::topo::unstructured::io::make_definition<D>(
+        mesh_file, mat_files, bnd_files);
     }
     else if(D == 3) {
 #if 0
@@ -76,7 +77,8 @@ coloring_test() {
 #endif
 #endif
 
-      md = flsp::topo::unstructured::io::make_definition<D>(mesh_file, mat_files, bnd_files);
+      md = flsp::topo::unstructured::io::make_definition<D>(
+        mesh_file, mat_files, bnd_files);
     } // if
 
     /*------------------------------------------------------------------------*
@@ -85,10 +87,12 @@ coloring_test() {
     auto [rank, size] = util::mpi::info(MPI_COMM_WORLD);
 
     auto global_cells = util::mpi::one_to_allv([&md](int, int) {
-      return md->num_entities(flsp::topo::unstructured::config<D>::index_space::cells);
+      return md->num_entities(
+        flsp::topo::unstructured::config<D>::index_space::cells);
     });
     auto global_vertices = util::mpi::one_to_allv([&md](int, int) {
-      return md->num_entities(flsp::topo::unstructured::config<D>::index_space::vertices);
+      return md->num_entities(
+        flsp::topo::unstructured::config<D>::index_space::vertices);
     });
     const flecsi::Color colors{4};
     util::equal_map cem(global_cells, size);
@@ -100,7 +104,7 @@ coloring_test() {
         std::vector<util::crs>>> /* using local indices */
       connectivity;
 
-    //util::annotation::rguard<main_region> main_guard;
+    // util::annotation::rguard<main_region> main_guard;
 
     /*------------------------------------------------------------------------*
       Read cell data on root process and send to the naive owners.
@@ -111,8 +115,10 @@ coloring_test() {
     /*------------------------------------------------------------------------*
       Create cell-to-cell graph.
      *------------------------------------------------------------------------*/
-    auto v2c = flsp::topo::unstructured::mesh::clr::cells_through_vertices(cem, vem, c2v);
-    auto [c2c, naive] = flsp::topo::unstructured::mesh::clr::create_naive(cem, c2v, v2c, D);
+    auto v2c = flsp::topo::unstructured::mesh::clr::cells_through_vertices(
+      cem, vem, c2v);
+    auto [c2c, naive] =
+      flsp::topo::unstructured::mesh::clr::create_naive(cem, c2v, v2c, D);
 
     std::vector<flecsi::Color> cell_raw;
 
@@ -130,8 +136,9 @@ coloring_test() {
     /*------------------------------------------------------------------------*
       Migrate the cell data to the owning processes.
      *------------------------------------------------------------------------*/
-    auto [cells, cp2m, cm2p] = flsp::topo::unstructured::mesh::clr::migrate_cells(
-      cem, pem, cell_raw, c2v, finfo, minfo, c2c, v2c);
+    auto [cells, cp2m, cm2p] =
+      flsp::topo::unstructured::mesh::clr::migrate_cells(
+        cem, pem, cell_raw, c2v, finfo, minfo, c2c, v2c);
 
     // FIXME: Remove after debug
 #if 1

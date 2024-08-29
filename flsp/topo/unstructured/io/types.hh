@@ -12,14 +12,15 @@ namespace flsp::topo::unstructured::io {
 
 // Define the I/O factory type.
 template<std::size_t D>
-using io_factory = flsp::topo::unstructured::util::factory<D /* dimensionality */,
-  definition_base<D> /* return type */,
-  std::string /* key type */,
-  /* callback args ... */
-  std::string const &,
-  std::optional<std::vector<std::string>>,
-  std::optional<std::vector<std::string>>,
-  MPI_Comm>;
+using io_factory =
+  flsp::topo::unstructured::util::factory<D /* dimensionality */,
+    definition_base<D> /* return type */,
+    std::string /* key type */,
+    /* callback args ... */
+    std::string const &,
+    std::optional<std::vector<std::string>>,
+    std::optional<std::vector<std::string>>,
+    MPI_Comm>;
 
 /*!
   Invoke the object factory to create a mesh definition.
@@ -62,6 +63,6 @@ make_definition(std::string const & filename,
     std::move(comm));
 } // make_definition
 
-} // namespace flsp::io
+} // namespace flsp::topo::unstructured::io
 
 #endif // FLSP_TOPO_UNSTRUCTURED_IO_TYPES_HH

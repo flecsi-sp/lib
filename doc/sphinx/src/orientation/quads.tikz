@@ -1,0 +1,39 @@
+\begin{tikzpicture}
+
+  \coordinate[label=center:{$\alpha$}] (A) at (2.5,2.5);
+  \coordinate[label=center:{$\beta$}] (B) at (7.5,2.5);
+
+  \coordinate (a) at (0,0);
+  \coordinate (b) at (5,0);
+  \coordinate (c) at (10,0);
+  \coordinate (d) at (10,5);
+  \coordinate (e) at (5,5);
+  \coordinate (f) at (0,5);
+
+  \coordinate (bl) at (4.5,0.5);
+  \coordinate (el) at (4.5,4.5);
+  \coordinate (br) at (5.5,0.5);
+  \coordinate (er) at (5.5,4.5);
+
+  \draw[thick] (a) -- (b) -- (e) -- (f) -- cycle;
+  \draw[thick] (b) -- (c) -- (d) -- (e) -- cycle;
+
+  \draw[->,thick] (bl) -- (el);
+  \draw[<-,thick] (br) -- (er);
+
+  \fill[black!20, draw=black, thick] (a) circle (3pt)
+    node[black, below right] {$a$};
+  \fill[black!20, draw=black, thick] (b) circle (3pt)
+    node[black, below right] {$b$};
+  \fill[black!20, draw=black, thick] (c) circle (3pt)
+    node[black, below right] {$c$};
+  \fill[black!20, draw=black, thick] (d) circle (3pt)
+    node[black, above right] {$d$};
+  \fill[black!20, draw=black, thick] (e) circle (3pt)
+    node[black, above right] {$e$};
+  \fill[black!20, draw=black, thick] (f) circle (3pt)
+    node[black, above right] {$f$};
+
+\end{tikzpicture}
+
+% vim: syntax=tex:
