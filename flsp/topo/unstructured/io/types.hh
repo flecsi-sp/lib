@@ -4,9 +4,9 @@
 #include "flsp/topo/unstructured/io/definition_base.hh"
 #include "flsp/topo/unstructured/util/factory.hh"
 
-#include <optional>
-
 #include <mpi.h>
+
+#include <optional>
 
 namespace flsp::topo::unstructured::io {
 

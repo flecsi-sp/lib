@@ -1,6 +1,13 @@
 #ifndef FLSP_TOPO_UNSTRUCTURED_IO_X3D_DEFINITION_H
 #define FLSP_TOPO_UNSTRUCTURED_IO_X3D_DEFINITION_H
 
+#include "flsp/topo/unstructured/io/definition_base.hh"
+#include "flsp/topo/unstructured/io/types.hh"
+#include "flsp/topo/unstructured/util/common.hh"
+
+#include <flecsi/flog.hh>
+#include <flecsi/util/common.hh>
+
 #include <cmath>
 #include <cstddef>
 #include <fstream>
@@ -8,13 +15,6 @@
 #include <sstream>
 #include <string>
 #include <utility>
-
-#include "flecsi/flog.hh"
-#include "flecsi/util/common.hh"
-
-#include "flsp/topo/unstructured/io/definition_base.hh"
-#include "flsp/topo/unstructured/io/types.hh"
-#include "flsp/topo/unstructured/util/common.hh"
 
 namespace flsp::topo::unstructured::io {
 
@@ -59,15 +59,54 @@ struct x3d_header {
 
   static constexpr auto X3D_TOKEN = "x3dtoflag ascii";
 
-  void read(std::fstream & fh);
+  void
+  read(std::fstream & fh) {
+    fh.seekg(0);
+    std::string tok;
+
+    std::getline(fh, tok);
+    assert_str(tok, X3D_TOKEN);
+
+    std::getline(fh, tok);
+    assert_str(tok, "header");
+
+    fh >> tok >> process;
+    fh >> tok >> numdim;
+    fh >> tok >> materials;
+    fh >> tok >> nodes;
+    fh >> tok >> faces;
+    fh >> tok >> elements;
+    fh >> tok >> ghost_nodes;
+    fh >> tok >> slaved_nodes;
+    fh >> tok >> nodes_per_slave;
+    fh >> tok >> nodes_per_face;
+    fh >> tok >> faces_per_cell;
+    fh >> tok >> node_data_fields;
+    fh >> tok >> cell_data_fields;
+
+    std::getline(fh, tok); // newline from previous line
+    std::getline(fh, tok);
+    assert_str(tok, "end_header");
+  } // read
 };
 
 struct x3d_seek {
   static constexpr std::size_t node_width = 80;
 
-  x3d_seek(std::fstream & fh, const x3d_header & h);
+  x3d_seek(std::fstream & fh, const x3d_header & h)
+    : cell_pos{0}, header{h} {
+    seek_nodes(fh);
+  }
 
-  void seek_nodes(std::fstream & fh);
+  void
+  seek_nodes(std::fstream & fh) {
+    fh.seekg(0);
+    std::string tok;
+    do {
+      std::getline(fh, tok);
+    } while(tok != "nodes");
+    node_pos = fh.tellg();
+  }
 
   constexpr std::size_t face_pos() const {
     return node_pos + node_width * header.nodes + 10; // end_nodes

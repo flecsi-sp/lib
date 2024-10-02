@@ -29,7 +29,7 @@ public:
 
   auto create(const K key, As &&... args) {
     typename map_t::const_iterator ita = map_.find(key);
-    flog_assert(ita != map_.end(), "error unknown type");
+    flog_assert(ita != map_.end(), "error unknown type " << key);
     return (ita->second(std::forward<As>(args)...));
   } // create
 

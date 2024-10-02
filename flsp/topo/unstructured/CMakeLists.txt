@@ -1,18 +1,14 @@
 flsp_sources(
-  io/x3d_definition.cc
 )
 
 flsp_headers(
-  config.hh
-  models.hh
   io/definition_base.hh
-  io/detail/exodus.hh
   io/exodus_definition.hh
+  io/models.hh
   io/simple_definition.hh
   io/x3d_definition.hh
-  mesh/coloring_functors.hh
-  mesh/coloring_utils.hh
-  mesh/types.hh
+  clr/coloring_functors.hh
+  clr/coloring_utils.hh
   util/common.hh
   util/factory.hh
 )
@@ -32,11 +28,12 @@ set(COLORING_INPUTS
   ${FLSP_DATA_DIR}/mesh/2d/mesh2d-8x8.bnd2
   ${FLSP_DATA_DIR}/mesh/2d/mesh2d-8x8.bnd3
   ${FLSP_DATA_DIR}/mesh/2d/mesh2d-8x8.bnd4
+  ${FLSP_DATA_DIR}/mesh/1d/mesh1d-8.msh
 )
 
-flsp_add_unit(new
+flsp_add_unit(mesh
   SOURCES
-    mesh/test/new.cc
+    clr/test/mesh.cc
   LIBRARIES
     FleCSI-SP::FleCSI-SP
   INPUTS

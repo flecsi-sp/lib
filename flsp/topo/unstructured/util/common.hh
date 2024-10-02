@@ -12,7 +12,7 @@
 namespace flsp::topo::unstructured {
 
 // Import types from flecsi
-using Color = flecsi::Color;
+using flecsi::Color;
 namespace flog = flecsi::flog;
 
 namespace util {

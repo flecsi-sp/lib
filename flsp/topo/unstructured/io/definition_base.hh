@@ -1,7 +1,7 @@
 #ifndef FLSP_TOPO_UNSTRUCTURED_IO_DEFINITION_BASE_HH
 #define FLSP_TOPO_UNSTRUCTURED_IO_DEFINITION_BASE_HH
 
-#include "flsp/topo/unstructured/config.hh"
+#include "flsp/topo/unstructured/io/models.hh"
 #include "flsp/topo/unstructured/util/common.hh"
 
 #include <flecsi/topo/unstructured/types.hh>

@@ -6,18 +6,103 @@
 #ifndef FLSP_TOPO_UNSTRUCTURED_MODELS_HH
 #define FLSP_TOPO_UNSTRUCTURED_MODELS_HH
 
-#include "flsp/topo/unstructured/config.hh"
 #include "flsp/topo/unstructured/util/common.hh"
 
-#include <cstdint>
-#include <type_traits>
+#include <cstddef>
 
 namespace flsp::topo::unstructured::io {
+
+template<std::size_t D>
+struct config;
+
+// 1D
+template<>
+struct config<1> {
+  static constexpr std::size_t dimension() {
+    return 1;
+  }
+  enum index_space {
+    vertices,
+    edges = vertices,
+    faces = edges,
+    cells,
+    sides = cells,
+    corners
+  };
+};
+
+// 2D
+template<>
+struct config<2> {
+  static constexpr std::size_t dimension() {
+    return 2;
+  }
+  enum index_space {
+    vertices,
+    edges,
+    faces = edges,
+    cells,
+    sides,
+    corners
+  };
+};
+
+// 3D
+template<>
+struct config<3> {
+  static constexpr std::size_t dimension() {
+    return 3;
+  }
+  enum index_space {
+    vertices,
+    edges,
+    faces,
+    cells,
+    sides,
+    corners
+  };
+};
+
+template<std::size_t D>
+using entity_kind = typename config<D>::index_space;
+
+template<std::size_t D>
+constexpr auto interface_kind();
+
+template<>
+constexpr auto
+interface_kind<1>() {
+  return entity_kind<1>::vertices;
+}
+
+template<>
+constexpr auto
+interface_kind<2>() {
+  return entity_kind<2>::edges;
+}
+
+template<>
+constexpr auto
+interface_kind<3>() {
+  return entity_kind<3>::faces;
+}
 
 template<std::size_t D, entity_kind<D> K>
 struct model {};
 
-// Corner creation is defined with 2D kinds (same for 2D and 3D).
+// Corner creation is defined with 3D kinds (same for all dimensions).
+
+template<std::size_t D, entity_kind<D> K>
+auto
+create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
+  util::crs const & c2v,
+  std::map<entity_kind<D>, util::crs> const &,
+  const std::optional<util::crs> & i2d = std::nullopt,
+  const std::optional<std::map<util::gid, util::id>> & ig2l = std::nullopt)
+  -> std::enable_if_t<D == 1 && K == entity_kind<D>::vertices,
+    std::pair<int, int>> {
+      return std::make_pair(0, 0);
+} // create_cell_entities
 
 // clang-format off
 struct tri3 {
@@ -47,7 +132,9 @@ template<std::size_t D, entity_kind<D> K>
 auto
 create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
   util::crs const & c2v,
-  std::map<entity_kind<D>, util::crs> const &)
+  std::map<entity_kind<D>, util::crs> const &,
+  const std::optional<util::crs> & i2d = std::nullopt,
+  const std::optional<std::map<util::gid, util::id>> & ig2l = std::nullopt)
   -> std::enable_if_t<D == 2 && K == entity_kind<D>::edges,
     std::pair<util::crs, std::map<entity_kind<D>, util::crs>>> {
   auto [gid, id, cfaid] = cid;
@@ -80,7 +167,9 @@ template<std::size_t D, entity_kind<D> K>
 auto
 create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
   util::crs const & c2v,
-  std::map<entity_kind<D>, util::crs> const & aux)
+  std::map<entity_kind<D>, util::crs> const & aux,
+  const std::optional<util::crs> & i2d = std::nullopt,
+  const std::optional<std::map<util::gid, util::id>> & ig2l = std::nullopt)
   -> std::enable_if_t<D == 2 && K == entity_kind<D>::sides,
     std::pair<util::crs, std::map<entity_kind<D>, util::crs>>> {
   auto [gid, id, cfaid] = cid;
@@ -234,7 +323,9 @@ template<std::size_t D, entity_kind<D> K>
 auto
 create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
   util::crs const & c2v,
-  std::map<entity_kind<D>, util::crs> const &)
+  std::map<entity_kind<D>, util::crs> const &,
+  const std::optional<util::crs> & i2d = std::nullopt,
+  const std::optional<std::map<util::gid, util::id>> & ig2l = std::nullopt)
   -> std::enable_if_t<D == 3 && K == entity_kind<D>::edges,
     std::pair<util::crs, std::map<entity_kind<D>, util::crs>>> {
   auto [gid, id, cfaid] = cid;
@@ -267,7 +358,9 @@ template<std::size_t D, entity_kind<D> K>
 auto
 create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
   util::crs const & c2v,
-  std::map<entity_kind<D>, util::crs> const &)
+  std::map<entity_kind<D>, util::crs> const &,
+  const std::optional<util::crs> & i2d = std::nullopt,
+  const std::optional<std::map<util::gid, util::id>> & ig2l = std::nullopt)
   -> std::enable_if_t<D == 3 && K == entity_kind<D>::faces,
     std::pair<util::crs, std::map<entity_kind<D>, util::crs>>> {
   auto [gid, id, cfaid] = cid;
@@ -303,7 +396,9 @@ template<std::size_t D, entity_kind<D> K>
 auto
 create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
   util::crs const & c2v,
-  std::map<entity_kind<D>, util::crs> const & aux)
+  std::map<entity_kind<D>, util::crs> const & aux,
+  const std::optional<util::crs> & i2d = std::nullopt,
+  const std::optional<std::map<util::gid, util::id>> & ig2l = std::nullopt)
   -> std::enable_if_t<D == 3 && K == entity_kind<D>::sides,
     std::pair<util::crs, std::map<entity_kind<D>, util::crs>>> {
   auto [gid, id, cfaid] = cid;
@@ -355,21 +450,33 @@ create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
   return std::make_pair(std::move(entities), std::move(a2a));
 } // create_cell_entities
 
-// 2D and 3D Corners.
+// 1D, 2D, and 3D Corners.
 template<std::size_t D, entity_kind<D> K>
 auto
 create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
   util::crs const & c2v,
-  std::map<entity_kind<D>, util::crs> const &)
-  -> std::enable_if_t<(D == 2 || D == 3) && K == entity_kind<D>::corners,
+  std::map<entity_kind<D>, util::crs> const & aux,
+  const std::optional<util::crs> & i2d = std::nullopt,
+  const std::optional<std::map<util::gid, util::id>> & ig2l = std::nullopt)
+  -> std::enable_if_t<(D == 1 || D == 2 || D == 3) && K == entity_kind<D>::corners,
     std::pair<util::crs, std::map<entity_kind<D>, util::crs>>> {
   auto [gid, id, cfaid] = cid;
   auto const & vertices = c2v[id];
   util::crs entities;
   std::map<entity_kind<D>, util::crs> a2a;
 
+  auto const & interfaces = aux.at(interface_kind<D>())[cfaid];
+
   for(std::size_t v{0}; v < vertices.size(); ++v) {
+    std::vector<util::gid> faces;
     entities.add_row({vertices[v], gid});
+    for(auto f: interfaces) {
+      const auto flid = ig2l.value().at(util::get_id(f));
+      if(i2d.value()[flid][0] == vertices[v] || i2d.value()[flid][1] == vertices[v]) {
+        faces.emplace_back(f);
+      } // if
+    } // for
+    a2a[interface_kind<D>()].add_row(faces);
   } // for
 
   return std::make_pair(std::move(entities), std::move(a2a));

@@ -152,16 +152,16 @@ if(ENABLE_LIBRARY)
   # Add library.
   #----------------------------------------------------------------------------#
 
-  add_library(FleCSI-SP)
+  add_library(FleCSI-SP INTERFACE)
   add_library(FleCSI-SP::FleCSI-SP ALIAS FleCSI-SP)
 
   target_include_directories(FleCSI-SP
-    PUBLIC
+    INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
     $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
   )
-  target_link_libraries(FleCSI-SP PUBLIC FleCSI::FleCSI)
+  target_link_libraries(FleCSI-SP INTERFACE FleCSI::FleCSI)
 
   #----------------------------------------------------------------------------#
   # Add options.
@@ -234,6 +234,7 @@ if(ENABLE_LIBRARY)
   include(FleCSI/unit)
 
   option(ENABLE_UNIT_TESTS "Enable unit testing" OFF)
+  mark_as_advanced(ENABLE_UNIT_TESTS)
 
   if(ENABLE_UNIT_TESTS)
     set(FLSP_DATA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/data)

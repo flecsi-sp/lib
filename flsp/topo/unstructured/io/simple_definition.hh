@@ -1,6 +1,9 @@
 #ifndef TOPO_UNSTRUCTURED_IO_SIMPLE_DEFINITION_HH
 #define TOPO_UNSTRUCTURED_IO_SIMPLE_DEFINITION_HH
 
+#include "flsp/topo/unstructured/io/definition_base.hh"
+#include "flsp/topo/unstructured/io/types.hh"
+
 #include <flecsi/flog.hh>
 
 #include <fstream>
@@ -8,13 +11,10 @@
 #include <string>
 #include <vector>
 
-#include "flsp/topo/unstructured/io/definition_base.hh"
-#include "flsp/topo/unstructured/io/types.hh"
-
 namespace flsp::topo::unstructured::io {
 
 template<std::size_t D,
-  typename = typename std::enable_if<(D == 2) || (D == 3)>::type>
+  typename = typename std::enable_if<(D == 1) || (D == 2) || (D == 3)>::type>
 struct simple_definition : definition_base<D> {
 
   static_assert(required_keys<entity_kind<D>,
@@ -127,6 +127,8 @@ simple_handler(const std::string & fname,
     return std::make_unique<undefined_definition<D>>();
   } // if
 }
+const inline bool register_simple_1d_ =
+  io_factory<1>::instance().register_type("msh", simple_handler<1>);
 const inline bool register_simple_2d_ =
   io_factory<2>::instance().register_type("msh", simple_handler<2>);
 const inline bool register_simple_3d_ =
