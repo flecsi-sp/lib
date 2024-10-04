@@ -954,8 +954,10 @@ close_vertices(util::equal_map const & vem,
         for(auto g : vertex_pcd.all)
           offsets[g] = i++;
       }
-    }
-  }
+
+      lco++;
+    } // for
+  } // scope
 
   {
     util::id lco{0};
