@@ -1,10 +1,10 @@
 #include "mesh.hh"
 
+#include "flsp/topo/unstructured/clr/coloring_utils.hh"
 #include "flsp/topo/unstructured/io/definition_base.hh"
 #include "flsp/topo/unstructured/io/simple_definition.hh"
-#include "flsp/topo/unstructured/io/x3d_definition.hh"
 #include "flsp/topo/unstructured/io/types.hh"
-#include "flsp/topo/unstructured/clr/coloring_utils.hh"
+#include "flsp/topo/unstructured/io/x3d_definition.hh"
 #include "flsp/topo/unstructured/util/common.hh"
 
 #include <flecsi/util/mpi.hh>
@@ -40,9 +40,8 @@ mesh_initialization_test() {
 
     typename mesh<D>::user_data user_data;
     typename mesh<D>::slot m;
-    m.allocate(
-      typename mesh<D>::mpi_coloring(
-        4, filename, matfiles, bndfiles, user_data),
+    m.allocate(typename mesh<D>::mpi_coloring(
+                 4, filename, matfiles, bndfiles, user_data),
       user_data);
   }; // UNIT
 } // mesh_initialization_test

@@ -2,8 +2,8 @@
 #define FLSP_TOPO_UNSTRUCTURED_CLR_TEST_MESH_HH
 
 #include "flsp/topo/unstructured/clr/coloring_utils.hh"
-#include "flsp/topo/unstructured/io/models.hh"
 #include "flsp/topo/unstructured/io/definition_base.hh"
+#include "flsp/topo/unstructured/io/models.hh"
 #include "flsp/topo/unstructured/io/types.hh"
 #include "flsp/topo/unstructured/util/common.hh"
 
@@ -30,7 +30,9 @@ struct policy;
 
 template<>
 struct policy<1> : flecsi::topo::help {
-  static constexpr std::size_t dimension() { return 1; }
+  static constexpr std::size_t dimension() {
+    return 1;
+  }
   // clang-format off
   enum index_space {
     vertices,
@@ -41,20 +43,15 @@ struct policy<1> : flecsi::topo::help {
   static auto num_index_spaces() { return 2; }
   // clang-format on
   using index_spaces = has<vertices, cells>;
-  using connectivities = list<from<cells, to<vertices>>,
-    from<vertices, to<cells>>>;
+  using connectivities =
+    list<from<cells, to<vertices>>, from<vertices, to<cells>>>;
   enum entity_list { owned, exclusive, shared, ghost };
   using entity_lists =
-    list<
-      entity<vertices, has<owned, exclusive, shared, ghost>>,
-      entity<cells, has<owned, exclusive, shared, ghost>
-    >
-  >;
+    list<entity<vertices, has<owned, exclusive, shared, ghost>>,
+      entity<cells, has<owned, exclusive, shared, ghost>>>;
   static std::vector<allocation> allocations() {
-    return {
-      { index_spaces::index<vertices>, index_spaces::index<cells>, true },
-      { index_spaces::index<cells>, index_spaces::index<vertices>, false }
-    };
+    return {{index_spaces::index<vertices>, index_spaces::index<cells>, true},
+      {index_spaces::index<cells>, index_spaces::index<vertices>, false}};
   }
   struct user_data {
     std::vector<util::point<1>> coords;
@@ -64,39 +61,32 @@ struct policy<1> : flecsi::topo::help {
 
 template<>
 struct policy<2> : flecsi::topo::help {
-  static constexpr std::size_t dimension() { return 2; }
-  enum index_space {
-    vertices,
-    edges,
-    faces = edges,
-    cells
-  };
-  static auto num_index_spaces() { return 3; }
+  static constexpr std::size_t dimension() {
+    return 2;
+  }
+  enum index_space { vertices, edges, faces = edges, cells };
+  static auto num_index_spaces() {
+    return 3;
+  }
   // this defines the idx_spaces order
   using index_spaces = has<vertices, edges, cells>;
-  using connectivities =
-    list<
-      // this defines the cnx_allocs order
-      from<vertices, to<edges, cells>>,
-      from<edges, to<vertices, cells>>,
-      from<cells, to<vertices, edges>>
-    >;
+  using connectivities = list<
+    // this defines the cnx_allocs order
+    from<vertices, to<edges, cells>>,
+    from<edges, to<vertices, cells>>,
+    from<cells, to<vertices, edges>>>;
   enum entity_list { owned, exclusive, shared, ghost };
   using entity_lists =
-    list<
-      entity<vertices, has<owned, exclusive, shared, ghost>>,
+    list<entity<vertices, has<owned, exclusive, shared, ghost>>,
       entity<edges, has<owned, exclusive, shared, ghost>>,
-      entity<cells, has<owned, exclusive, shared, ghost>>
-    >;
+      entity<cells, has<owned, exclusive, shared, ghost>>>;
   static std::vector<allocation> allocations() {
-    return {
-      { index_spaces::index<vertices>, index_spaces::index<edges>, true },
-      { index_spaces::index<vertices>, index_spaces::index<cells>, true },
-      { index_spaces::index<edges>, index_spaces::index<vertices>, false },
-      { index_spaces::index<edges>, index_spaces::index<cells>, true },
-      { index_spaces::index<cells>, index_spaces::index<vertices>, false },
-      { index_spaces::index<cells>, index_spaces::index<edges>, false }
-    };
+    return {{index_spaces::index<vertices>, index_spaces::index<edges>, true},
+      {index_spaces::index<vertices>, index_spaces::index<cells>, true},
+      {index_spaces::index<edges>, index_spaces::index<vertices>, false},
+      {index_spaces::index<edges>, index_spaces::index<cells>, true},
+      {index_spaces::index<cells>, index_spaces::index<vertices>, false},
+      {index_spaces::index<cells>, index_spaces::index<edges>, false}};
   }
   struct user_data {
     std::vector<util::point<2>> coords;
@@ -108,42 +98,34 @@ struct policy<2> : flecsi::topo::help {
 
 template<>
 struct policy<3> : flecsi::topo::help {
-  static constexpr std::size_t dimension() { return 3; }
-  enum index_space {
-    vertices,
-    edges,
-    faces,
-    cells
-  };
-  static auto num_index_spaces() { return 4; }
+  static constexpr std::size_t dimension() {
+    return 3;
+  }
+  enum index_space { vertices, edges, faces, cells };
+  static auto num_index_spaces() {
+    return 4;
+  }
   using index_spaces = has<vertices, edges, faces, cells>;
-  using connectivities =
-    list<
-      from<vertices, to<edges, faces, cells>>,
-      from<edges, to<vertices, cells>>,
-      from<faces, to<vertices, cells>>,
-      from<cells, to<vertices, edges, faces>>
-    >;
+  using connectivities = list<from<vertices, to<edges, faces, cells>>,
+    from<edges, to<vertices, cells>>,
+    from<faces, to<vertices, cells>>,
+    from<cells, to<vertices, edges, faces>>>;
   enum entity_list { owned, exclusive, shared, ghost };
   using entity_lists =
-    list<
-      entity<vertices, has<owned, exclusive, shared, ghost>>,
+    list<entity<vertices, has<owned, exclusive, shared, ghost>>,
       entity<edges, has<owned, exclusive, shared, ghost>>,
-      entity<cells, has<owned, exclusive, shared, ghost>>
-    >;
+      entity<cells, has<owned, exclusive, shared, ghost>>>;
   static std::vector<allocation> allocations() {
-    return {
-      { index_spaces::index<vertices>, index_spaces::index<edges>, true },
-      { index_spaces::index<vertices>, index_spaces::index<faces>, true },
-      { index_spaces::index<vertices>, index_spaces::index<cells>, true },
-      { index_spaces::index<edges>, index_spaces::index<vertices>, false },
-      { index_spaces::index<edges>, index_spaces::index<cells>, true },
-      { index_spaces::index<faces>, index_spaces::index<vertices>, false },
-      { index_spaces::index<faces>, index_spaces::index<cells>, true },
-      { index_spaces::index<cells>, index_spaces::index<vertices>, false },
-      { index_spaces::index<cells>, index_spaces::index<edges>, false },
-      { index_spaces::index<cells>, index_spaces::index<faces>, false }
-    };
+    return {{index_spaces::index<vertices>, index_spaces::index<edges>, true},
+      {index_spaces::index<vertices>, index_spaces::index<faces>, true},
+      {index_spaces::index<vertices>, index_spaces::index<cells>, true},
+      {index_spaces::index<edges>, index_spaces::index<vertices>, false},
+      {index_spaces::index<edges>, index_spaces::index<cells>, true},
+      {index_spaces::index<faces>, index_spaces::index<vertices>, false},
+      {index_spaces::index<faces>, index_spaces::index<cells>, true},
+      {index_spaces::index<cells>, index_spaces::index<vertices>, false},
+      {index_spaces::index<cells>, index_spaces::index<edges>, false},
+      {index_spaces::index<cells>, index_spaces::index<faces>, false}};
   }
   struct user_data {
     std::vector<util::point<3>> coords;
@@ -160,9 +142,9 @@ struct policy<3> : flecsi::topo::help {
  *----------------------------------------------------------------------------*/
 
 template<std::size_t D>
-struct mesh :
-  policy<D>,
-  flecsi::topo::specialization<flecsi::topo::unstructured, mesh<D>> {
+struct mesh
+  : policy<D>,
+    flecsi::topo::specialization<flecsi::topo::unstructured, mesh<D>> {
 
   static_assert(D == 1 || D == 2 || D == 3, "invalid mesh dimension");
 
@@ -173,8 +155,8 @@ struct mesh :
   using typename mesh<D>::specialization::base;
   using typename mesh<D>::specialization::core;
   using coloring =
-    typename flecsi::topo::specialization<
-      flecsi::topo::unstructured, mesh<D>>::coloring;
+    typename flecsi::topo::specialization<flecsi::topo::unstructured,
+      mesh<D>>::coloring;
   using point = util::point<D>;
   using Color = flecsi::Color;
   using entity_kind = io::entity_kind<D>;
@@ -346,12 +328,10 @@ struct mesh :
       io::make_definition<D>(filename, matfiles, bndfiles);
 
     auto [rank, size] = util::mpi::info(MPI_COMM_WORLD);
-    auto global_cells = util::mpi::one_to_allv([&md](int, int) {
-      return md->num_entities(entity_kind::cells);
-    });
-    auto global_vertices = util::mpi::one_to_allv([&md](int, int) {
-      return md->num_entities(entity_kind::vertices);
-    });
+    auto global_cells = util::mpi::one_to_allv(
+      [&md](int, int) { return md->num_entities(entity_kind::cells); });
+    auto global_vertices = util::mpi::one_to_allv(
+      [&md](int, int) { return md->num_entities(entity_kind::vertices); });
 
     util::equal_map cem(global_cells, size);
     util::equal_map vem(global_vertices, size);
@@ -435,8 +415,8 @@ struct mesh :
     } // for
 
     auto rank_colors =
-      util::mpi::all_to_allv([&vertices](int r, int) ->
-        auto & { return vertices[r]; });
+      util::mpi::all_to_allv([&vertices](
+                               int r, int) -> auto & { return vertices[r]; });
 
     std::vector<Color> vertex_raw;
     const auto vr = vem[rank];
@@ -463,7 +443,7 @@ struct mesh :
       connectivity;
 
     connectivity.resize(policy<D>::num_index_spaces());
-    for(uint32_t from = 0; from <policy<D>::num_index_spaces(); ++from) {
+    for(uint32_t from = 0; from < policy<D>::num_index_spaces(); ++from) {
       connectivity[from].resize(pem[rank].size());
       for(auto & cnx : connectivity[from]) {
         cnx.resize(policy<D>::num_index_spaces());
@@ -544,7 +524,8 @@ struct mesh :
        *------------------------------------------------------------------------*/
 
       std::map<entity_kind, util::crs> auxmap;
-      std::map<entity_kind, std::vector<clr::process_color_data> &> other_pcdata;
+      std::map<entity_kind, std::vector<clr::process_color_data> &>
+        other_pcdata;
 
       /*------------------------------------------------------------------------*
         Add interface auxiliaries.
@@ -569,15 +550,37 @@ struct mesh :
 
       if constexpr(D == 3) {
         auto [c2e, e2d, ea2a, el2g, eg2l, e_pcdata] =
-          clr::add_auxiliaries<D, entity_kind::edges>(
-            pem, cfa, c2v, cm2p, cfam2p, cfap2m, cshr, cghst, coloring, cog2l,
-            col2g, c2co, v2co, auxmap, std::nullopt, cell_pcdata, vertex_pcdata);
+          clr::add_auxiliaries<D, entity_kind::edges>(pem,
+            cfa,
+            c2v,
+            cm2p,
+            cfam2p,
+            cfap2m,
+            cshr,
+            cghst,
+            coloring,
+            cog2l,
+            col2g,
+            c2co,
+            v2co,
+            auxmap,
+            std::nullopt,
+            cell_pcdata,
+            vertex_pcdata);
 
         auxmap.try_emplace(entity_kind::edges, c2e);
         other_pcdata.emplace(entity_kind::edges, e_pcdata);
-        clr::convert_connectivity<D, entity_kind::edges>(
-          cell_pcdata, vertex_pcdata, other_pcdata, pem[rank].size(), c2e, e2d,
-          ea2a, cm2p, cfam2p, eg2l, connectivity);
+        clr::convert_connectivity<D, entity_kind::edges>(cell_pcdata,
+          vertex_pcdata,
+          other_pcdata,
+          pem[rank].size(),
+          c2e,
+          e2d,
+          ea2a,
+          cm2p,
+          cfam2p,
+          eg2l,
+          connectivity);
       } // if
     } // if
 
@@ -635,7 +638,8 @@ struct mesh :
       coloring.color_peers.push_back(s.size());
     } // for
 
-    flecsi::topo::concatenate(coloring.color_peers, pem.total(), MPI_COMM_WORLD);
+    flecsi::topo::concatenate(
+      coloring.color_peers, pem.total(), MPI_COMM_WORLD);
 
     return coloring;
   } // color
@@ -645,7 +649,8 @@ struct mesh :
    *--------------------------------------------------------------------------*/
 
   static void initialize(flecsi::data::topology_slot<mesh<D>> & s,
-    coloring const & c, const policy<D>::user_data & user_data) {
+    coloring const & c,
+    const policy<D>::user_data & user_data) {
 
     /*------------------------------------------------------------------------*
       Resize connectivity storage.
@@ -658,11 +663,11 @@ struct mesh :
     c2v(s).get_elements().resize();
     v2c(s).get_elements().resize();
 
-    if constexpr (D == 2 || D == 3) {
+    if constexpr(D == 2 || D == 3) {
       auto & c2f =
         s->template get_connectivity<index_space::cells, index_space::faces>();
-      auto & f2v =
-        s->template get_connectivity<index_space::faces, index_space::vertices>();
+      auto & f2v = s->template get_connectivity<index_space::faces,
+        index_space::vertices>();
 
       c2f(s).get_elements().resize();
       f2v(s).get_elements().resize();
@@ -671,8 +676,8 @@ struct mesh :
     if constexpr(D == 3) {
       auto & c2e =
         s->template get_connectivity<index_space::cells, index_space::edges>();
-      auto & e2v =
-        s->template get_connectivity<index_space::edges, index_space::vertices>();
+      auto & e2v = s->template get_connectivity<index_space::edges,
+        index_space::vertices>();
 
       c2e(s).get_elements().resize();
       e2v(s).get_elements().resize();

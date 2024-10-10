@@ -59,8 +59,7 @@ struct x3d_header {
 
   static constexpr auto X3D_TOKEN = "x3dtoflag ascii";
 
-  void
-  read(std::fstream & fh) {
+  void read(std::fstream & fh) {
     fh.seekg(0);
     std::string tok;
 
@@ -93,13 +92,11 @@ struct x3d_header {
 struct x3d_seek {
   static constexpr std::size_t node_width = 80;
 
-  x3d_seek(std::fstream & fh, const x3d_header & h)
-    : cell_pos{0}, header{h} {
+  x3d_seek(std::fstream & fh, const x3d_header & h) : cell_pos{0}, header{h} {
     seek_nodes(fh);
   }
 
-  void
-  seek_nodes(std::fstream & fh) {
+  void seek_nodes(std::fstream & fh) {
     fh.seekg(0);
     std::string tok;
     do {

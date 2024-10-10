@@ -1,9 +1,9 @@
 #ifndef FLSP_TOPO_UNSTRUCTURED_CLR_COLORING_UTILS_HH
 #define FLSP_TOPO_UNSTRUCTURED_CLR_COLORING_UTILS_HH
 
+#include "flsp/topo/unstructured/clr/coloring_functors.hh"
 #include "flsp/topo/unstructured/io/definition_base.hh"
 #include "flsp/topo/unstructured/io/models.hh"
-#include "flsp/topo/unstructured/clr/coloring_functors.hh"
 #include "flsp/topo/unstructured/util/common.hh"
 
 #include <flecsi/flog.hh>
@@ -1694,7 +1694,7 @@ close_auxiliaries(util::equal_map const & pem,
     util::force_unique(aux_pcd.owned);
     util::force_unique(aux_pcd.ghost);
 
-    if (reorder) {
+    if(reorder) {
       // Sort ghosts by remote color to improve Legion performance.
 
       std::map<Color, std::vector<util::gid>> ghost_by_color;
@@ -2008,9 +2008,10 @@ convert_connectivity(
     auto & crs_corners = connectivity[aux_kind][lco][entity_kind<D>::corners];
 
     for(auto egid : primary_pcd.all) {
-      crs_cell.add_row(flecsi::util::transform_view(
-                                                    c2a[cm2p.at(egid)], [&](util::gid g) { return aux_pcd.g2l()(util::get_id(g)); }));
+      crs_cell.add_row(flecsi::util::transform_view(c2a[cm2p.at(egid)],
+        [&](util::gid g) { return aux_pcd.g2l()(util::get_id(g)); }));
     } // for
+
     for(auto agid : aux_pcd.all) {
       const util::id alid = ag2l.at(agid);
       std::vector<util::id> vertices;
@@ -2019,9 +2020,9 @@ convert_connectivity(
         a2d[alid], [&](util::gid g) { return vertex_pcd.g2l()(g); });
 
       if constexpr(aux_kind == entity_kind<D>::sides) {
-        auto face_view = flecsi::util::transform_view(
-          a2a.at(entity_kind<D>::faces)[alid],
-          [&](util::gid g) { return face_pcd.g2l()(g); });
+        auto face_view =
+          flecsi::util::transform_view(a2a.at(entity_kind<D>::faces)[alid],
+            [&](util::gid g) { return face_pcd.g2l()(g); });
         // auto corner_view = flecsi::util::transform_view(
         //   a2a.at(entity_kind<D>::corners)[ag2l.at(agid)],
         //   [&](util::gid g) { return corner_pcd.g2l()(g); });
@@ -2033,15 +2034,18 @@ convert_connectivity(
         // corners.emplace_back(corner_view[1]);
 
         // build side-corner connectivity
-        // const auto & c2cor = connectivity[entity_kind::cells][lco][entity_kind::corners];
-        // const auto & cor2v = connectivity[entity_kind::corners][lco][entity_kind::vertices];
+        // const auto & c2cor =
+        // connectivity[entity_kind::cells][lco][entity_kind::corners]; const
+        // auto & cor2v =
+        // connectivity[entity_kind::corners][lco][entity_kind::vertices];
         // util::id cid{0};
         // for(const auto sides : crs_cell) {
-        //   if(std::find(sides.begin(), sides.end(), alid) != sides.end()) break;
+        //   if(std::find(sides.begin(), sides.end(), alid) != sides.end())
+        //   break;
         //   ++cid;
         // }
-        // flog_assert(cid < crs_cell.size(), "could not find cell associated with side");
-        // for(const auto cor : c2cor[cid]) {
+        // flog_assert(cid < crs_cell.size(), "could not find cell associated
+        // with side"); for(const auto cor : c2cor[cid]) {
         //   const auto vert_of_cor = cor2v[cor][0];
         //   for(const auto v : vertices) {
         //     if(v == vert_of_cor) {
@@ -2050,14 +2054,15 @@ convert_connectivity(
         //     }
         //   }
         // }
-        // flog_assert(corners.size() == 2, "every side needs to be connected to 2 corners");
+        // flog_assert(corners.size() == 2, "every side needs to be connected to
+        // 2 corners");
       }
       else if constexpr(aux_kind == entity_kind<D>::corners) {
         auto face_view = flecsi::util::transform_view(
           a2a.at(entity_kind<D>::faces)[ag2l.at(agid)],
           [&](util::gid g) { return face_pcd.g2l()(util::get_id(g)); });
         vertices.emplace_back(view[0]);
-        for (auto f : face_view) {
+        for(auto f : face_view) {
           faces.emplace_back(f);
         }
       }

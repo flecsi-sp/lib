@@ -37,14 +37,7 @@ struct config<2> {
   static constexpr std::size_t dimension() {
     return 2;
   }
-  enum index_space {
-    vertices,
-    edges,
-    faces = edges,
-    cells,
-    sides,
-    corners
-  };
+  enum index_space { vertices, edges, faces = edges, cells, sides, corners };
 };
 
 // 3D
@@ -53,14 +46,7 @@ struct config<3> {
   static constexpr std::size_t dimension() {
     return 3;
   }
-  enum index_space {
-    vertices,
-    edges,
-    faces,
-    cells,
-    sides,
-    corners
-  };
+  enum index_space { vertices, edges, faces, cells, sides, corners };
 };
 
 template<std::size_t D>
@@ -101,7 +87,7 @@ create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
   const std::optional<std::map<util::gid, util::id>> & ig2l = std::nullopt)
   -> std::enable_if_t<D == 1 && K == entity_kind<D>::vertices,
     std::pair<int, int>> {
-      return std::make_pair(0, 0);
+  return std::make_pair(0, 0);
 } // create_cell_entities
 
 // clang-format off
@@ -458,7 +444,8 @@ create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
   std::map<entity_kind<D>, util::crs> const & aux,
   const std::optional<util::crs> & i2d = std::nullopt,
   const std::optional<std::map<util::gid, util::id>> & ig2l = std::nullopt)
-  -> std::enable_if_t<(D == 1 || D == 2 || D == 3) && K == entity_kind<D>::corners,
+  -> std::enable_if_t<(D == 1 || D == 2 || D == 3) &&
+                        K == entity_kind<D>::corners,
     std::pair<util::crs, std::map<entity_kind<D>, util::crs>>> {
   auto [gid, id, cfaid] = cid;
   auto const & vertices = c2v[id];
@@ -470,9 +457,10 @@ create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
   for(std::size_t v{0}; v < vertices.size(); ++v) {
     std::vector<util::gid> faces;
     entities.add_row({vertices[v], gid});
-    for(auto f: interfaces) {
+    for(auto f : interfaces) {
       const auto flid = ig2l.value().at(util::get_id(f));
-      if(i2d.value()[flid][0] == vertices[v] || i2d.value()[flid][1] == vertices[v]) {
+      if(i2d.value()[flid][0] == vertices[v] ||
+         i2d.value()[flid][1] == vertices[v]) {
         faces.emplace_back(f);
       } // if
     } // for
