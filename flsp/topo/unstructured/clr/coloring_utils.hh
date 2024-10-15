@@ -2071,8 +2071,8 @@ convert_connectivity(
       }
       crs_vert.add_row(vertices);
       crs_faces.add_row(faces);
-      if constexpr(aux_kind != entity_kind<D>::corners)
-        crs_corners.add_row(corners);
+      // if constexpr(aux_kind != entity_kind<D>::corners)
+      //   crs_corners.add_row(corners);
     }
   }
 }
