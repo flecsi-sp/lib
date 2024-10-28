@@ -434,6 +434,7 @@ close_cells(util::equal_map const & cem,
   util::equal_map const & pem,
   std::vector<Color> const & raw,
   std::map<Color, std::vector<util::gid>> const & cells,
+  std::map<Color, std::uint32_t> const & cog2l,
   util::id depth,
   util::crs & c2v,
   std::optional<io::face_info> & finfo,
@@ -624,13 +625,13 @@ close_cells(util::equal_map const & cem,
   std::vector<std::vector<std::pair<Color, util::gid>>> process_ghosts(size);
 
   auto & partitions = clrng.idx_spaces[cidx].partitions;
-  std::vector<std::set<Color>> color_peers(cells.size());
+  std::vector<std::set<Color>> color_peers(pem[rank].size());
 
   std::vector<process_primary_color_data> cell_pcdata(pem[rank].size());
 
   {
-    util::id lco{0};
     for(auto const & [co /* global color */, cs] : cells) {
+      auto lco = cog2l.at(co);
       auto & pc = cell_pcdata[lco];
       auto & cp = color_peers[lco];
       auto & offsets = cell_pcdata[lco].offsets;
@@ -664,8 +665,6 @@ close_cells(util::equal_map const & cem,
         is_peers.emplace_back(peers.begin(), peers.end());
         cp.merge(peers);
       }
-
-      ++lco;
     } // for
 
     /*
@@ -677,8 +676,7 @@ close_cells(util::equal_map const & cem,
           [&sources](int r, int) -> auto & { return sources[r]; }, comm)) {
       auto & f = fulfills.emplace_back();
       for(const auto id : rv)
-        f.emplace_back(
-          cell_pcdata[c2co.at(id) - pem[rank].front()].offsets.at(id));
+        f.emplace_back(cell_pcdata[cog2l.at(c2co.at(id))].offsets.at(id));
     } // for
 
     /*
@@ -769,6 +767,7 @@ close_vertices(util::equal_map const & vem,
   std::map<util::gid, util::id> const & cm2p,
   std::vector<Color> const & raw,
   std::vector<process_primary_color_data> const & cell_pcdata,
+  std::map<Color, std::uint32_t> const & cog2l,
   std::vector<util::point<D>> & coords,
   std::optional<io::bnd_ids> & binfo,
   std::map<util::gid, util::id> & vm2p,
@@ -796,8 +795,8 @@ close_vertices(util::equal_map const & vem,
   std::vector<process_color_data> vertex_pcdata(pem[rank].size());
 
   {
-    util::id lco{0};
     for(auto const & [co, cs] : cells) {
+      const auto lco = cog2l.at(co);
       auto primary = clrng.idx_spaces[cidx].colors[lco];
       auto & vertex_pcd = vertex_pcdata[lco];
       auto & primary_pcd = cell_pcdata[lco];
@@ -872,7 +871,6 @@ close_vertices(util::equal_map const & vem,
       util::force_unique(vertex_pcd.owned);
       util::force_unique(vertex_pcd.ghost);
 
-      ++lco;
     } // for
   } // scope
 
@@ -921,8 +919,8 @@ close_vertices(util::equal_map const & vem,
 
   {
     // Build local vertex offsets
-    util::id lco{0};
     for(auto const & [co, cs] : cells) {
+      const auto lco = cog2l.at(co);
       auto & ic = vert_color.colors[lco];
       auto & vertex_pcd = vertex_pcdata[lco];
       auto & offsets = vertex_pcd.offsets;
@@ -955,13 +953,12 @@ close_vertices(util::equal_map const & vem,
           offsets[g] = i++;
       }
 
-      lco++;
     } // for
   } // scope
 
   {
-    util::id lco{0};
     for(auto const & [co, cs] : cells) {
+      const auto lco = cog2l.at(co);
       auto & ic = vert_color.colors[lco];
       auto & vertex_pcd = vertex_pcdata[lco];
       auto & cp = color_peers[lco];
@@ -993,7 +990,6 @@ close_vertices(util::equal_map const & vem,
       cp.insert(peers.begin(), peers.end());
       is_peers.emplace_back(peers.begin(), peers.end());
 
-      ++lco;
     } // for
   } // scope
 
@@ -1006,8 +1002,7 @@ close_vertices(util::equal_map const & vem,
         [&sources](int r, int) -> auto & { return sources[r]; }, comm)) {
     auto & f = fulfills.emplace_back();
     for(const auto id : rv)
-      f.emplace_back(
-        vertex_pcdata[v2co.at(id) - pem[rank].front()].offsets.at(id));
+      f.emplace_back(vertex_pcdata[cog2l.at(v2co.at(id))].offsets.at(id));
   } // for
 
   /*

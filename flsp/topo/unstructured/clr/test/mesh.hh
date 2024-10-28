@@ -384,7 +384,7 @@ struct mesh
 
     // clang-format off
     auto [vdeps, cshr, cghst, crghost, c2co, color_peers, cell_pcdata] =
-      clr::close_cells(cem, pem, cell_raw, cells, 1, c2v, finfo, minfo, cp2m,
+      clr::close_cells(cem, pem, cell_raw, cells, cog2l, 1, c2v, finfo, minfo, cp2m,
         cm2p, c2c, v2c, coloring, entity_kind::cells);
     // clang-format on
 
@@ -393,7 +393,7 @@ struct mesh
      *------------------------------------------------------------------------*/
 
     std::map<util::gid, Color> v2co;
-    for(std::uint32_t lco{0}; lco < cells.size(); ++lco) {
+    for(std::uint32_t lco{0}; lco < cog2l.size(); ++lco) {
       auto const & pc = coloring.idx_spaces[entity_kind::cells].colors[lco];
 
       for(auto c_lid /* local cell id */ : pc.owned()) {
@@ -457,7 +457,7 @@ struct mesh
 
     // clang-format off
     auto [vertex_pcdata] = clr::close_vertices(vem, pem, v2co, vdeps, cells,
-      c2v, cm2p, vertex_raw, cell_pcdata, coords, binfo, vm2p, vp2m, coloring,
+                                               c2v, cm2p, vertex_raw, cell_pcdata, cog2l, coords, binfo, vm2p, vp2m, coloring,
       connectivity, color_peers, entity_kind::cells, entity_kind::vertices);
     // clang-format on
 
