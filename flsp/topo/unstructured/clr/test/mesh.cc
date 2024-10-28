@@ -2,10 +2,10 @@
 
 #include "flsp/topo/unstructured/clr/coloring_utils.hh"
 #include "flsp/topo/unstructured/io/definition_base.hh"
+#include "flsp/topo/unstructured/io/exodus_definition.hh"
 #include "flsp/topo/unstructured/io/simple_definition.hh"
 #include "flsp/topo/unstructured/io/types.hh"
 #include "flsp/topo/unstructured/io/x3d_definition.hh"
-#include "flsp/topo/unstructured/io/exodus_definition.hh"
 #include "flsp/topo/unstructured/util/common.hh"
 
 #include <flecsi/util/mpi.hh>
