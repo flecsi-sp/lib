@@ -2008,7 +2008,7 @@ convert_connectivity(
     auto & crs_corners = connectivity[aux_kind][lco][entity_kind<D>::corners];
 
     for(auto egid : primary_pcd.all) {
-      crs_cell.add_row(flecsi::util::transform_view(c2a[cm2p.at(egid)],
+      crs_cell.add_row(flecsi::util::transform_view(c2a[cfam2p.at(egid)],
         [&](util::gid g) { return aux_pcd.g2l()(util::get_id(g)); }));
     } // for
 
