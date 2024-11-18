@@ -24,7 +24,7 @@ class FlecsiSp(CMakePackage):
 
     depends_on("py-sphinx", when="+doc")
     depends_on("py-sphinx-rtd-theme", when="+doc")
-    depends_on("py-recommonmark", when="@:2.2 +doc")
+    depends_on("py-recommonmark", when="+doc")
     depends_on("doxygen", when="+doc")
     depends_on("graphviz", when="+doc")
 
