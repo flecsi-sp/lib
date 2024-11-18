@@ -5,6 +5,7 @@
  * Exodus definition adapted from implementation by Marc Charest.
  */
 
+#include "flsp/config.hh"
 #include "flsp/topo/unstructured/io/definition_base.hh"
 #include "flsp/topo/unstructured/io/types.hh"
 
@@ -884,12 +885,15 @@ exodus_handler(const std::string & fname,
     return std::make_unique<undefined_definition<D>>();
   } // if
 }
+
+#if defined(FLECSI_SP_ENABLE_EXODUSII)
 const inline bool register_exodus_1d_ =
   io_factory<1>::instance().register_type("exo", exodus_handler<1>);
 const inline bool register_exodus_2d_ =
   io_factory<2>::instance().register_type("exo", exodus_handler<2>);
 const inline bool register_exodus_3d_ =
   io_factory<3>::instance().register_type("exo", exodus_handler<3>);
+#endif
 
 } // namespace flsp::topo::unstructured::io
 

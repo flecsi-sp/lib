@@ -2,3 +2,22 @@
 # Copyright (C) 2023, Triad National Security, LLC
 # All rights reserved
 #------------------------------------------------------------------------------#
+@FLECSI_SP_CONFIG_CODE@
+
+#------------------------------------------------------------------------------#
+# Add FleCSI CMake modules
+#------------------------------------------------------------------------------#
+
+if(NOT FLECSI_SP_CMAKE)
+  get_filename_component(FleCSI_SP_CMAKE_BASE_DIR
+    "${CMAKE_CURRENT_LIST_DIR}" DIRECTORY
+  )
+  message(STATUS "Found FleCSI-SP CMake Modules (Appending CMAKE_MODULE_PATH): "
+    ${FleCSI_SP_CMAKE_BASE_DIR})
+  list(APPEND CMAKE_MODULE_PATH ${FleCSI_SP_CMAKE_BASE_DIR})
+  set(FLECSI_SP_CMAKE TRUE)
+endif()
+
+if(@ENABLE_EXODUSII@)
+  find_package(EXODUSII REQUIRED)
+endif()

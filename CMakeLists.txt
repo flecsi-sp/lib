@@ -133,8 +133,9 @@ if(ENABLE_DOCUMENTATION)
 endif()
 
 #------------------------------------------------------------------------------#
-# FleCSI Library
+# FleCSI-SP Library
 #------------------------------------------------------------------------------#
+
 option(ENABLE_LIBRARY "Enable build of FleCSI-SP library" ON)
 mark_as_advanced(ENABLE_LIBRARY)
 
@@ -144,6 +145,7 @@ if(ENABLE_LIBRARY)
   #----------------------------------------------------------------------------#
 
   option(ENABLE_EXODUSII "Build with ExodusII Support" ON)
+  option(ENABLE_X3D "Build with X3D Support" ON)
 
   include(GNUInstallDirs)
   include(FleCSI-SP/exodusii)
@@ -180,8 +182,8 @@ if(ENABLE_LIBRARY)
     _matchedVars "${_variableNames}")
 
   foreach(_variableName ${_matchedVars})
-    set(FLECSI_${_variableName} ${${_variableName}})
-    set(FleCSI_${_variableName} ${${_variableName}})
+    set(FLECSI_SP_${_variableName} ${${_variableName}})
+    set(FleCSI_SP_${_variableName} ${${_variableName}})
   endforeach()
 
   #----------------------------------------------------------------------------#
@@ -202,21 +204,13 @@ if(ENABLE_LIBRARY)
   #------------------------------------------------------------------------------#
 
   get_cmake_property(_variableNames VARIABLES)
-  string (REGEX MATCHALL "(^|;)FLECSI_[A-Za-z0-9_]*"
+  string (REGEX MATCHALL "(^|;)FLECSI_SP_[A-Za-z0-9_]*"
     _matchedVars "${_variableNames}")
 
   foreach(_variableName ${_matchedVars})
     string(REGEX REPLACE "FLSP" "FleCSI-SP" _tmpvariableName ${_variableName})
-    set(FLECSI_CONFIG_CODE
-      "${FLECSI_CONFIG_CODE}\nset(${_tmpvariableName} \"${${_variableName}}\")")
-  endforeach()
-
-  string(REGEX MATCHALL "(^|;)FLOG_[A-Za-z0-9_]*"
-    _matchedVars "${_variableNames}")
-
-  foreach(_variableName ${_matchedVars})
-    set(FLOG_CONFIG_CODE
-      "${FLOG_CONFIG_CODE}\nset(${_variableName} \"${${_variableName}}\")")
+    set(FLECSI_SP_CONFIG_CODE
+      "${FLECSI_SP_CONFIG_CODE}\nset(${_tmpvariableName} \"${${_variableName}}\")")
   endforeach()
 
   configure_file(${PROJECT_SOURCE_DIR}/cmake/FleCSI-SP/FleCSISPConfig.cmake.in
