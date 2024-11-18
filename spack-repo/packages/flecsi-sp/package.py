@@ -18,7 +18,7 @@ class FlecsiSp(CMakePackage):
     )
     variant("doc", default=False, description="Enable documentation")
 
-    depends_on("flecsi@2.3")
+    depends_on("flecsi@2.3:")
 
     depends_on("exodusii", when="+exodusii")
 
