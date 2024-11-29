@@ -17,13 +17,13 @@ namespace clr = flsp::topo::unstructured::clr;
 namespace io = flsp::topo::unstructured::io;
 namespace util = flsp::topo::unstructured::util;
 
-/*----------------------------------------------------------------------------*
-  Helper.
- *----------------------------------------------------------------------------*/
-
 namespace unit {
 
 using allocation = std::tuple<std::size_t, std::size_t, bool>;
+
+/*----------------------------------------------------------------------------*
+  Helper.
+ *----------------------------------------------------------------------------*/
 
 template<std::size_t D>
 struct policy;
