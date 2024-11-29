@@ -200,7 +200,7 @@ if(ENABLE_LIBRARY)
 
   #------------------------------------------------------------------------------#
   # Extract all project options so they can be exported to the
-  # FleCSISPConfig.cmake file.
+  # FleCSI-SPConfig.cmake file.
   #------------------------------------------------------------------------------#
 
   get_cmake_property(_variableNames VARIABLES)
@@ -213,11 +213,11 @@ if(ENABLE_LIBRARY)
       "${FLECSI_SP_CONFIG_CODE}\nset(${_tmpvariableName} \"${${_variableName}}\")")
   endforeach()
 
-  configure_file(${PROJECT_SOURCE_DIR}/cmake/FleCSI-SP/FleCSISPConfig.cmake.in
-    ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/FleCSISPConfig.cmake @ONLY)
+  configure_file(${PROJECT_SOURCE_DIR}/cmake/FleCSI-SP/FleCSI-SPConfig.cmake.in
+    ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/FleCSI-SPConfig.cmake @ONLY)
   
   install(
-    FILES ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/FleCSISPConfig.cmake
+    FILES ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/FleCSI-SPConfig.cmake
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/FleCSI-SP
   )
 
@@ -253,15 +253,15 @@ if(ENABLE_LIBRARY)
   #----------------------------------------------------------------------------#
   install(TARGETS FleCSI-SP
     EXPORT
-      FleCSISPTargets
+      FleCSI-SPTargets
     DESTINATION
       ${CMAKE_INSTALL_LIBDIR}
     FILE_SET public_headers DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/flecsi-sp
   )
 
-  install(EXPORT FleCSISPTargets
+  install(EXPORT FleCSI-SPTargets
     FILE
-    FleCSISPTargets.cmake
+    FleCSI-SPTargets.cmake
     NAMESPACE
       FleCSI-SP::
     DESTINATION
@@ -278,11 +278,11 @@ if(ENABLE_LIBRARY)
 
   include(CMakePackageConfigHelpers)
   write_basic_package_version_file(
-    ${CMAKE_CURRENT_BINARY_DIR}/FleCSISPConfigVersion.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/FleCSI-SPConfigVersion.cmake
     VERSION ${FleCSI_SP_VERSION}
     COMPATIBILITY AnyNewerVersion
   )
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/FleCSISPConfigVersion.cmake
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/FleCSI-SPConfigVersion.cmake
     DESTINATION
       ${CMAKE_INSTALL_LIBDIR}/cmake/FleCSI-SP
   )
