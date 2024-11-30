@@ -1,8 +1,8 @@
-#ifndef FLSP_TOPO_UNSTRUCTURED_IO_DEFINITION_BASE_HH
-#define FLSP_TOPO_UNSTRUCTURED_IO_DEFINITION_BASE_HH
+#ifndef FLSP_UNSTRUCTURED_IO_DEFINITION_BASE_HH
+#define FLSP_UNSTRUCTURED_IO_DEFINITION_BASE_HH
 
-#include "flsp/topo/unstructured/io/models.hh"
-#include "flsp/topo/unstructured/util/common.hh"
+#include "flsp/unstructured/io/models.hh"
+#include "flsp/unstructured/util/common.hh"
 
 #include <flecsi/topo/unstructured/types.hh>
 #include <flecsi/util/array_ref.hh>
@@ -12,7 +12,7 @@
 #include <tuple>
 #include <vector>
 
-namespace flsp::topo::unstructured::io {
+namespace flsp::unstructured::io {
 
 template<typename E, E... Ks>
 struct required_keys {
@@ -115,7 +115,7 @@ struct undefined_definition : definition_base<D> {
   }
 }; // struct undefined_definition
 
-} // namespace flsp::topo::unstructured::io
+} // namespace flsp::unstructured::io
 
 namespace flecsi::util::serial {
 template<class T>
@@ -141,8 +141,8 @@ struct traits<std::optional<T>, std::enable_if_t<!bit_copyable_v<T>>> {
 };
 
 template<>
-struct traits<flsp::topo::unstructured::io::face_info> {
-  using type = flsp::topo::unstructured::io::face_info;
+struct traits<flsp::unstructured::io::face_info> {
+  using type = flsp::unstructured::io::face_info;
   template<class P>
   static void put(P & p, const type & fi) {
     serial::put(p, fi.c2f, fi.f2v, fi.p2m);
@@ -154,4 +154,4 @@ struct traits<flsp::topo::unstructured::io::face_info> {
 };
 } // namespace flecsi::util::serial
 
-#endif // FLSP_TOPO_UNSTRUCTURED_IO_DEFINITION_BASE_HH
+#endif // FLSP_UNSTRUCTURED_IO_DEFINITION_BASE_HH

@@ -1,6 +1,3 @@
-flsp_sources(
-)
-
 flsp_headers(
   io/definition_base.hh
   io/exodus_definition.hh

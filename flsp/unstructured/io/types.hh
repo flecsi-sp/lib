@@ -1,19 +1,19 @@
 #ifndef FLSP_TOPO_UNSTRUCTURED_IO_TYPES_HH
 #define FLSP_TOPO_UNSTRUCTURED_IO_TYPES_HH
 
-#include "flsp/topo/unstructured/io/definition_base.hh"
-#include "flsp/topo/unstructured/util/factory.hh"
+#include "flsp/unstructured/io/definition_base.hh"
+#include "flsp/unstructured/util/factory.hh"
 
 #include <mpi.h>
 
 #include <optional>
 
-namespace flsp::topo::unstructured::io {
+namespace flsp::unstructured::io {
 
 // Define the I/O factory type.
 template<std::size_t D>
 using io_factory =
-  flsp::topo::unstructured::util::factory<D /* dimensionality */,
+  flsp::unstructured::util::factory<D /* dimensionality */,
     definition_base<D> /* return type */,
     std::string /* key type */,
     /* callback args ... */
@@ -63,6 +63,6 @@ make_definition(std::string const & filename,
     std::move(comm));
 } // make_definition
 
-} // namespace flsp::topo::unstructured::io
+} // namespace flsp::unstructured::io
 
 #endif // FLSP_TOPO_UNSTRUCTURED_IO_TYPES_HH

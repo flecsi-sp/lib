@@ -1,9 +1,9 @@
-#ifndef FLSP_TOPO_UNSTRUCTURED_IO_X3D_DEFINITION_H
-#define FLSP_TOPO_UNSTRUCTURED_IO_X3D_DEFINITION_H
+#ifndef FLSP_UNSTRUCTURED_IO_X3D_DEFINITION_H
+#define FLSP_UNSTRUCTURED_IO_X3D_DEFINITION_H
 
-#include "flsp/topo/unstructured/io/definition_base.hh"
-#include "flsp/topo/unstructured/io/types.hh"
-#include "flsp/topo/unstructured/util/common.hh"
+#include "flsp/unstructured/io/definition_base.hh"
+#include "flsp/unstructured/io/types.hh"
+#include "flsp/unstructured/util/common.hh"
 
 #include <flecsi/flog.hh>
 #include <flecsi/util/common.hh>
@@ -16,7 +16,7 @@
 #include <string>
 #include <utility>
 
-namespace flsp::topo::unstructured::io {
+namespace flsp::unstructured::io {
 
 static void
 assert_str(std::string_view expect, std::string_view got) {
@@ -653,6 +653,6 @@ const inline bool register_x3d_2d_ =
 const inline bool register_x3d_3d_ =
   io_factory<3>::instance().register_type("x3d", x3d_handler<3>);
 
-} // namespace flsp::topo::unstructured::io
+} // namespace flsp::unstructured::io
 
-#endif // FLSP_TOPO_UNSTRUCTURED_IO_X3D_DEFINITION_H
+#endif // FLSP_UNSTRUCTURED_IO_X3D_DEFINITION_H

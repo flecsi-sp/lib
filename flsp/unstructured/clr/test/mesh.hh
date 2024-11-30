@@ -1,11 +1,11 @@
-#ifndef FLSP_TOPO_UNSTRUCTURED_CLR_TEST_MESH_HH
-#define FLSP_TOPO_UNSTRUCTURED_CLR_TEST_MESH_HH
+#ifndef FLSP_UNSTRUCTURED_CLR_TEST_MESH_HH
+#define FLSP_UNSTRUCTURED_CLR_TEST_MESH_HH
 
-#include "flsp/topo/unstructured/clr/coloring_utils.hh"
-#include "flsp/topo/unstructured/io/definition_base.hh"
-#include "flsp/topo/unstructured/io/models.hh"
-#include "flsp/topo/unstructured/io/types.hh"
-#include "flsp/topo/unstructured/util/common.hh"
+#include "flsp/unstructured/clr/coloring_utils.hh"
+#include "flsp/unstructured/io/definition_base.hh"
+#include "flsp/unstructured/io/models.hh"
+#include "flsp/unstructured/io/types.hh"
+#include "flsp/unstructured/util/common.hh"
 
 #include <flecsi/data.hh>
 #include <flecsi/topo/unstructured/interface.hh>
@@ -13,9 +13,9 @@
 
 #include <cstddef>
 
-namespace clr = flsp::topo::unstructured::clr;
-namespace io = flsp::topo::unstructured::io;
-namespace util = flsp::topo::unstructured::util;
+namespace clr = flsp::unstructured::clr;
+namespace io = flsp::unstructured::io;
+namespace util = flsp::unstructured::util;
 
 namespace unit {
 
@@ -687,4 +687,4 @@ struct mesh
 
 } // namespace unit
 
-#endif // FLSP_TOPO_UNSTRUCTURED_CLR_TEST_MESH_HH
+#endif // FLSP_UNSTRUCTURED_CLR_TEST_MESH_HH

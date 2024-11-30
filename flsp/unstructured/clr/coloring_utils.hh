@@ -1,10 +1,10 @@
 #ifndef FLSP_TOPO_UNSTRUCTURED_CLR_COLORING_UTILS_HH
 #define FLSP_TOPO_UNSTRUCTURED_CLR_COLORING_UTILS_HH
 
-#include "flsp/topo/unstructured/clr/coloring_functors.hh"
-#include "flsp/topo/unstructured/io/definition_base.hh"
-#include "flsp/topo/unstructured/io/models.hh"
-#include "flsp/topo/unstructured/util/common.hh"
+#include "flsp/unstructured/clr/coloring_functors.hh"
+#include "flsp/unstructured/io/definition_base.hh"
+#include "flsp/unstructured/io/models.hh"
+#include "flsp/unstructured/util/common.hh"
 
 #include <flecsi/flog.hh>
 #include <flecsi/topo/unstructured/types.hh>
@@ -16,7 +16,7 @@
 #include <optional>
 
 /// \cond core
-namespace flsp::topo::unstructured::clr {
+namespace flsp::unstructured::clr {
 /// \addtogroup mesh
 /// \{
 

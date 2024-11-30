@@ -1,13 +1,13 @@
-#ifndef FLSP_TOPO_UNSTRUCTURED_IO_EXODUS_DEFINITION_HH
-#define FLSP_TOPO_UNSTRUCTURED_IO_EXODUS_DEFINITION_HH
+#ifndef FLSP_UNSTRUCTURED_IO_EXODUS_DEFINITION_HH
+#define FLSP_UNSTRUCTURED_IO_EXODUS_DEFINITION_HH
 
 /**
  * Exodus definition adapted from implementation by Marc Charest.
  */
 
 #include "flsp/config.hh"
-#include "flsp/topo/unstructured/io/definition_base.hh"
-#include "flsp/topo/unstructured/io/types.hh"
+#include "flsp/unstructured/io/definition_base.hh"
+#include "flsp/unstructured/io/types.hh"
 
 #include <exodusII.h>
 
@@ -15,7 +15,7 @@
 #include <memory>
 #include <vector>
 
-namespace flsp::topo::unstructured::io {
+namespace flsp::unstructured::io {
 
 namespace detail {
 
@@ -895,6 +895,6 @@ const inline bool register_exodus_3d_ =
   io_factory<3>::instance().register_type("exo", exodus_handler<3>);
 #endif
 
-} // namespace flsp::topo::unstructured::io
+} // namespace flsp::unstructured::io
 
-#endif // FLSP_TOPO_UNSTRUCTURED_IO_EXODUS_DEFINITION_HH
+#endif // FLSP_UNSTRUCTURED_IO_EXODUS_DEFINITION_HH

@@ -1,11 +1,11 @@
-#ifndef FLSP_TOPO_UNSTRUCTURED_CLR_CORE_FUNCTORS_HH
-#define FLSP_TOPO_UNSTRUCTURED_CLR_CORE_FUNCTORS_HH
+#ifndef FLSP_UNSTRUCTURED_CLR_CORE_FUNCTORS_HH
+#define FLSP_UNSTRUCTURED_CLR_CORE_FUNCTORS_HH
 
-#include "flsp/topo/unstructured/io/definition_base.hh"
-#include "flsp/topo/unstructured/util/common.hh"
+#include "flsp/unstructured/io/definition_base.hh"
+#include "flsp/unstructured/util/common.hh"
 
 /// \cond core
-namespace flsp::topo::unstructured::clr {
+namespace flsp::unstructured::clr {
 /// \addtogroup mesh
 /// \{
 
@@ -533,7 +533,7 @@ private:
 }; // struct pack_field
 
 /// \}
-} // namespace flsp::topo::unstructured::clr
+} // namespace flsp::unstructured::clr
 /// \endcond
 
-#endif // FLSP_TOPO_UNSTRUCTURED_CLR_CORE_FUNCTORS_HH
+#endif // FLSP_UNSTRUCTURED_CLR_CORE_FUNCTORS_HH

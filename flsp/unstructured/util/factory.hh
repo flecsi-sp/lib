@@ -1,12 +1,12 @@
-#ifndef FLSP_TOPO_UNSTRUCTURED_UTIL_FACTORY_HH
-#define FLSP_TOPO_UNSTRUCTURED_UTIL_FACTORY_HH
+#ifndef FLSP_UNSTRUCTURED_UTIL_FACTORY_HH
+#define FLSP_UNSTRUCTURED_UTIL_FACTORY_HH
 
 #include <flecsi/flog.hh>
 
 #include <map>
 #include <memory>
 
-namespace flsp::topo::unstructured::util {
+namespace flsp::unstructured::util {
 
 template<std::size_t D, typename R, typename K, typename... As>
 class factory
@@ -40,6 +40,6 @@ private:
   ~factory() {}
 }; // class factory
 
-} // namespace flsp::topo::unstructured::util
+} // namespace flsp::unstructured::util
 
-#endif // FLSP_TOPO_UNSTRUCTURED_UTIL_FACTORY_HH
+#endif // FLSP_UNSTRUCTURED_UTIL_FACTORY_HH

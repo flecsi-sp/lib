@@ -1,5 +1,5 @@
-#ifndef FLSP_TOPO_UNSTRUCTURED_UTIL_COMMON_HH
-#define FLSP_TOPO_UNSTRUCTURED_UTIL_COMMON_HH
+#ifndef FLSP_UNSTRUCTURED_UTIL_COMMON_HH
+#define FLSP_UNSTRUCTURED_UTIL_COMMON_HH
 
 #include <flecsi/util/color_map.hh>
 #include <flecsi/util/common.hh>
@@ -9,7 +9,7 @@
 #include <cmath>
 
 /// @cond core
-namespace flsp::topo::unstructured {
+namespace flsp::unstructured {
 
 // Import types from flecsi
 using flecsi::Color;
@@ -128,8 +128,8 @@ operator<<(std::ostream & stream, scrs const & graph) {
 
 /// \}
 } // namespace util
-} // namespace flsp::topo::unstructured
+} // namespace flsp::unstructured
 
 /// @endcond
 
-#endif // FLSP_TOPO_UNSTRUCTURED_UTIL_COMMON_HH
+#endif // FLSP_UNSTRUCTURED_UTIL_COMMON_HH

@@ -3,14 +3,14 @@
   All rights reserved.
  */
 
-#ifndef FLSP_TOPO_UNSTRUCTURED_MODELS_HH
-#define FLSP_TOPO_UNSTRUCTURED_MODELS_HH
+#ifndef FLSP_UNSTRUCTURED_MODELS_HH
+#define FLSP_UNSTRUCTURED_MODELS_HH
 
-#include "flsp/topo/unstructured/util/common.hh"
+#include "flsp/unstructured/util/common.hh"
 
 #include <cstddef>
 
-namespace flsp::topo::unstructured::io {
+namespace flsp::unstructured::io {
 
 template<std::size_t D>
 struct config;
@@ -470,6 +470,6 @@ create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
   return std::make_pair(std::move(entities), std::move(a2a));
 } // create_cell_entities
 
-} // namespace flsp::topo::unstructured::io
+} // namespace flsp::unstructured::io
 
-#endif // FLSP_TOPO_UNSTRUCTURED_MODELS_HH
+#endif // FLSP_UNSTRUCTURED_MODELS_HH

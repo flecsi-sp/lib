@@ -195,7 +195,7 @@ if(ENABLE_LIBRARY)
     
   install(
     FILES ${CMAKE_BINARY_DIR}/flsp/config.hh
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/flecsi-sp
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/flsp
   )
 
   #------------------------------------------------------------------------------#
@@ -256,7 +256,7 @@ if(ENABLE_LIBRARY)
       FleCSI-SPTargets
     DESTINATION
       ${CMAKE_INSTALL_LIBDIR}
-    FILE_SET public_headers DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/flecsi-sp
+    FILE_SET public_headers DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/flsp
   )
 
   install(EXPORT FleCSI-SPTargets
