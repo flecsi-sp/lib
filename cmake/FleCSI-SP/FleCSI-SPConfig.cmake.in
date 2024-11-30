@@ -21,3 +21,11 @@ endif()
 if(@ENABLE_EXODUSII@)
   find_package(EXODUSII REQUIRED)
 endif()
+
+#------------------------------------------------------------------------------#
+# FleCSI-SP library dependencies (contains definitions for IMPORTED targets)
+#------------------------------------------------------------------------------#
+
+if(NOT TARGET FleCSI-SP AND NOT FleCSI_SP_BINARY_DIR)
+  include(${CMAKE_CURRENT_LIST_DIR}/FleCSI-SPTargets.cmake)
+endif()

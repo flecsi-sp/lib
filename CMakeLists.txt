@@ -286,5 +286,4 @@ if(ENABLE_LIBRARY)
     DESTINATION
       ${CMAKE_INSTALL_LIBDIR}/cmake/FleCSI-SP
   )
-  message("LIBDIR: ${CMAKE_INSTALL_LIBDIR}")
 endif()
