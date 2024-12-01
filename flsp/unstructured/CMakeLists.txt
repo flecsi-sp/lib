@@ -1,11 +1,12 @@
 flsp_headers(
+  clr/coloring_functors.hh
+  clr/coloring_utils.hh
   io/definition_base.hh
   io/exodus_definition.hh
   io/models.hh
   io/simple_definition.hh
+  io/types.hh
   io/x3d_definition.hh
-  clr/coloring_functors.hh
-  clr/coloring_utils.hh
   util/common.hh
   util/factory.hh
 )
