@@ -8,7 +8,11 @@
 
 namespace flsp::unstructured::util {
 
-template<std::size_t D, typename R, typename K, typename... As>
+template<template<std::size_t> typename P,
+  std::size_t D,
+  typename R,
+  typename K,
+  typename... As>
 class factory
 {
 public:

@@ -1,7 +1,6 @@
 #ifndef FLSP_UNSTRUCTURED_IO_DEFINITION_BASE_HH
 #define FLSP_UNSTRUCTURED_IO_DEFINITION_BASE_HH
 
-#include "flsp/unstructured/io/models.hh"
 #include "flsp/unstructured/util/common.hh"
 
 #include <flecsi/topo/unstructured/types.hh>
@@ -14,7 +13,9 @@
 
 namespace flsp::unstructured::io {
 
-template<typename E, E... Ks>
+template<template<std::size_t> typename P,
+  std::size_t D,
+  P<D>::index_space... Ks>
 struct required_keys {
   static constexpr bool value{true};
 };
@@ -54,7 +55,7 @@ using iota_view = flecsi::util::iota_view<std::size_t>;
   Abstract base class for mesh definitions.
  */
 
-template<std::size_t D>
+template<template<std::size_t> typename P, std::size_t D>
 struct definition_base {
 
   virtual ~definition_base(){};
@@ -63,7 +64,7 @@ struct definition_base {
     Return the global number of entities of the given kind.
    */
 
-  virtual util::gid num_entities(entity_kind<D> k) const = 0;
+  virtual util::gid num_entities(P<D>::index_space is) const = 0;
 
   /*!
     Return relational information for the given cell range.
@@ -96,10 +97,10 @@ struct definition_base {
   Empty mesh definition class to use for non-root process construction.
  */
 
-template<std::size_t D>
-struct undefined_definition : definition_base<D> {
+template<template<std::size_t> typename P, std::size_t D>
+struct undefined_definition : definition_base<P, D> {
   undefined_definition() {}
-  util::gid num_entities(entity_kind<D>) const override {
+  util::gid num_entities(P<D>::index_space) const override {
     flog_fatal("undefined mesh definition");
     return {};
   }

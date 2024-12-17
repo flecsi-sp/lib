@@ -69,7 +69,7 @@ mark_as_advanced(ENABLE_FORMAT)
 if(ENABLE_FORMAT)
   include(FleCSI/format)
 
-  set(CLANG_FORMAT_VERSION "13...<14" CACHE STRING
+  set(CLANG_FORMAT_VERSION "18...<19" CACHE STRING
       "Set the required version (major[.minor[.patch]]) of clang-format")
   mark_as_advanced(CLANG_FORMAT_VERSION)
 
@@ -287,3 +287,43 @@ if(ENABLE_LIBRARY)
       ${CMAKE_INSTALL_LIBDIR}/cmake/FleCSI-SP
   )
 endif()
+
+#------------------------------------------------------------------------------#
+# Output configuration summary.
+#------------------------------------------------------------------------------#
+
+include(FleCSI/summary)
+
+flecsi_summary_header()
+flecsi_summary_info("FleCSI-SP Version" "${FleCSI_SP_VERSION_BRIEF}" FALSE)
+
+string(APPEND _summary "\n")
+
+if(FleCSI_SP_REPO_STATE)
+  flecsi_summary_info("Repository state" "${FleCSI_SP_REPO_STATE}" FALSE)
+endif()
+
+string(APPEND _summary "\n")
+
+if(NOT ENABLE_SANITY_BUILD)
+  flecsi_summary_info("CMAKE_BUILD_TYPE" "${CMAKE_BUILD_TYPE}" TRUE)
+  flecsi_summary_info("CMAKE_INSTALL_PREFIX" "${CMAKE_INSTALL_PREFIX}" TRUE)
+  string(APPEND _summary "\n")
+  flecsi_summary_info("CMAKE_CXX_COMPILER" "${CMAKE_CXX_COMPILER}" TRUE)
+  flecsi_summary_info("CMAKE_CXX_COMPILER_VERSION"
+    "${CMAKE_CXX_COMPILER_VERSION}" TRUE)
+  flecsi_summary_info("CMAKE_CXX_FLAGS" "${CMAKE_CXX_FLAGS}" TRUE)
+  flecsi_summary_info("CMAKE_C_COMPILER" "${CMAKE_C_COMPILER}" TRUE)
+  flecsi_summary_info("CMAKE_C_COMPILER_VERSION" "${CMAKE_C_COMPILER_VERSION}" TRUE)
+  flecsi_summary_info("CMAKE_C_FLAGS" "${CMAKE_C_FLAGS}" TRUE)
+
+  string(APPEND _summary "\n")
+  flecsi_summary_option("ENABLE_UNIT_TESTS" "${ENABLE_UNIT_TESTS}" "")
+  string(APPEND _summary "\n")
+endif()
+
+if(ENABLE_FORMAT AND TARGET ClangFormat::ClangFormat)
+  flecsi_summary_info("ClangFormat_EXECUTABLE" "${ClangFormat_EXECUTABLE}" TRUE)
+endif()
+
+message(STATUS ${_summary})

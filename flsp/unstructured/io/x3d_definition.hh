@@ -266,13 +266,13 @@ public:
   }
 };
 
-template<std::size_t D>
-struct x3d_definition : definition_base<D> {
+template<template<std::size_t> typename EK,
+  std::size_t D,
+  typename = typename std::enable_if_t<(D == 2) || (D == 3)>>
+struct x3d_definition : definition_base<EK, D> {
 
-  static_assert(required_keys<entity_kind<D>,
-                  entity_kind<D>::cells,
-                  entity_kind<D>::vertices,
-                  entity_kind<D>::faces>::value,
+  static_assert(
+    required_keys<EK, D, EK<D>::cells, EK<D>::vertices, EK<D>::faces>::value,
     "required entity kind undefined");
 
   using size = std::size_t;
@@ -454,19 +454,19 @@ protected:
     }
   }
 
-  virtual util::gid num_entities(entity_kind<D> k) const override {
-    flog_assert(k == entity_kind<D>::cells || k == entity_kind<D>::vertices ||
-                  k == entity_kind<D>::faces,
+  virtual util::gid num_entities(EK<D>::index_space is) const override {
+    flog_assert(
+      is == EK<D>::cells || is == EK<D>::vertices || is == EK<D>::faces,
       "invalid entity kind " << k);
 
-    switch(k) {
-      case entity_kind<D>::cells:
+    switch(is) {
+      case EK<D>::cells:
         return header.elements;
         break;
-      case entity_kind<D>::vertices:
+      case EK<D>::vertices:
         return header.nodes;
         break;
-      case entity_kind<D>::faces:
+      case EK<D>::faces:
         return f2v.size();
         break;
       default:
@@ -633,8 +633,8 @@ protected:
   mutable std::vector<region_file_reader> matreaders;
 };
 
-template<std::size_t D>
-std::unique_ptr<definition_base<D>>
+template<template<std::size_t> typename EK, std::size_t D>
+std::unique_ptr<definition_base<EK, D>>
 x3d_handler(const std::string & fname,
   std::optional<std::vector<std::string>> matfiles,
   std::optional<std::vector<std::string>> bndfiles,
@@ -642,16 +642,12 @@ x3d_handler(const std::string & fname,
   int rank;
   MPI_Comm_rank(comm, &rank);
   if(rank == 0) {
-    return std::make_unique<x3d_definition<D>>(fname, matfiles, bndfiles);
+    return std::make_unique<x3d_definition<EK, D>>(fname, matfiles, bndfiles);
   }
   else {
-    return std::make_unique<undefined_definition<D>>();
+    return std::make_unique<undefined_definition<EK, D>>();
   }
-}
-const inline bool register_x3d_2d_ =
-  io_factory<2>::instance().register_type("x3d", x3d_handler<2>);
-const inline bool register_x3d_3d_ =
-  io_factory<3>::instance().register_type("x3d", x3d_handler<3>);
+} // x3d_handler
 
 } // namespace flsp::unstructured::io
 

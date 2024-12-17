@@ -11,16 +11,16 @@
 namespace flsp::unstructured::io {
 
 // Define the I/O factory type.
-template<std::size_t D>
-using io_factory =
-  flsp::unstructured::util::factory<D /* dimensionality */,
-    definition_base<D> /* return type */,
-    std::string /* key type */,
-    /* callback args ... */
-    std::string const &,
-    std::optional<std::vector<std::string>>,
-    std::optional<std::vector<std::string>>,
-    MPI_Comm>;
+template<template<std::size_t> typename EK, std::size_t D>
+using io_factory = flsp::unstructured::util::factory<EK,
+  D /* dimensionality */,
+  definition_base<EK, D> /* return type */,
+  std::string /* key type */,
+  /* callback args ... */
+  std::string const &,
+  std::optional<std::vector<std::string>>,
+  std::optional<std::vector<std::string>>,
+  MPI_Comm>;
 
 /*!
   Invoke the object factory to create a mesh definition.
@@ -29,10 +29,10 @@ using io_factory =
   @param comm      An optional MPI communicator.
  */
 
-template<std::size_t D>
+template<template<std::size_t> typename EK, std::size_t D>
 inline auto
 make_definition(std::string const & filename, MPI_Comm comm = MPI_COMM_WORLD) {
-  return io_factory<D>::instance().create(
+  return io_factory<EK, D>::instance().create(
     filename.substr(filename.find_last_of('.') + 1),
     filename,
     std::nullopt,
@@ -49,13 +49,13 @@ make_definition(std::string const & filename, MPI_Comm comm = MPI_COMM_WORLD) {
   @param comm      An optional MPI communicator.
  */
 
-template<std::size_t D>
+template<template<std::size_t> typename EK, std::size_t D>
 inline auto
 make_definition(std::string const & filename,
   std::vector<std::string> matfiles,
   std::vector<std::string> bndfiles,
   MPI_Comm comm = MPI_COMM_WORLD) {
-  return io_factory<D>::instance().create(
+  return io_factory<EK, D>::instance().create(
     filename.substr(filename.find_last_of('.') + 1),
     filename,
     std::move(matfiles),

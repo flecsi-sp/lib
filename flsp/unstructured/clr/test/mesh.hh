@@ -3,11 +3,11 @@
 
 #include "flsp/unstructured/clr/coloring_utils.hh"
 #include "flsp/unstructured/io/definition_base.hh"
-#include "flsp/unstructured/io/models.hh"
 #include "flsp/unstructured/io/types.hh"
 #include "flsp/unstructured/util/common.hh"
 
 #include <flecsi/data.hh>
+#include <flecsi/flog.hh>
 #include <flecsi/topo/unstructured/interface.hh>
 #include <flecsi/util/parmetis.hh>
 
@@ -36,6 +36,7 @@ struct policy<1> : flecsi::topo::help {
   // clang-format off
   enum index_space {
     vertices,
+    interfaces = vertices,
     edges = vertices,
     faces = edges,
     cells
@@ -57,6 +58,28 @@ struct policy<1> : flecsi::topo::help {
     std::vector<util::point<1>> coords;
     std::vector<util::crs> c2v;
   };
+
+  template<index_space IS>
+  static constexpr std::size_t unsorted() {
+    return 0;
+  } // unsorted
+
+  template<index_space IS>
+  static constexpr bool subcell() {
+    return false;
+  } // subcell
+
+  template<index_space IS>
+  static std::string entity_kind_name() {
+    switch(IS) {
+      case vertices:
+        return "vertices";
+      case cells:
+        return "cells";
+      default:
+        flog_fatal("invalied entity kind");
+    } // switch
+  } // entity_kind_name
 };
 
 template<>
@@ -64,7 +87,13 @@ struct policy<2> : flecsi::topo::help {
   static constexpr std::size_t dimension() {
     return 2;
   }
-  enum index_space { vertices, edges, faces = edges, cells };
+  enum index_space {
+    vertices,
+    edges,
+    interfaces = edges,
+    faces = edges,
+    cells
+  };
   static auto num_index_spaces() {
     return 3;
   }
@@ -94,6 +123,30 @@ struct policy<2> : flecsi::topo::help {
     std::vector<util::crs> c2e;
     std::vector<util::crs> e2v;
   };
+
+  template<index_space IS>
+  static constexpr std::size_t unsorted() {
+    return 0;
+  } // unsorted
+
+  template<index_space IS>
+  static constexpr bool subcell() {
+    return false;
+  } // subcell
+
+  template<index_space IS>
+  static std::string entity_kind_name() {
+    switch(IS) {
+      case vertices:
+        return "vertices";
+      case edges:
+        return "edges";
+      case cells:
+        return "cells";
+      default:
+        flog_fatal("invalied entity kind");
+    } // switch
+  } // entity_kind_name
 };
 
 template<>
@@ -101,7 +154,7 @@ struct policy<3> : flecsi::topo::help {
   static constexpr std::size_t dimension() {
     return 3;
   }
-  enum index_space { vertices, edges, faces, cells };
+  enum index_space { vertices, edges, faces, interfaces = faces, cells };
   static auto num_index_spaces() {
     return 4;
   }
@@ -135,6 +188,32 @@ struct policy<3> : flecsi::topo::help {
     std::vector<util::crs> f2v;
     std::vector<util::crs> e2v;
   };
+
+  template<index_space IS>
+  static constexpr std::size_t unsorted() {
+    return 0;
+  } // unsorted
+
+  template<index_space IS>
+  static constexpr bool subcell() {
+    return false;
+  } // subcell
+
+  template<index_space IS>
+  static std::string entity_kind_name() {
+    switch(IS) {
+      case vertices:
+        return "vertices";
+      case edges:
+        return "edges";
+      case faces:
+        return "faces";
+      case cells:
+        return "cells";
+      default:
+        flog_fatal("invalied entity kind");
+    } // switch
+  } // entity_kind_name
 };
 
 /*----------------------------------------------------------------------------*
@@ -159,7 +238,6 @@ struct mesh
       mesh<D>>::coloring;
   using point = util::point<D>;
   using Color = flecsi::Color;
-  using entity_kind = io::entity_kind<D>;
 
   /*--------------------------------------------------------------------------*
     Policy Information.
@@ -324,14 +402,14 @@ struct mesh
     std::vector<std::string> const & bndfiles,
     user_data & user_data) {
 
-    std::unique_ptr<io::definition_base<D>> md =
-      io::make_definition<D>(filename, matfiles, bndfiles);
+    std::unique_ptr<io::definition_base<policy, D>> md =
+      io::make_definition<policy, D>(filename, matfiles, bndfiles);
 
     auto [rank, size] = util::mpi::info(MPI_COMM_WORLD);
     auto global_cells = util::mpi::one_to_allv(
-      [&md](int, int) { return md->num_entities(entity_kind::cells); });
+      [&md](int, int) { return md->num_entities(index_space::cells); });
     auto global_vertices = util::mpi::one_to_allv(
-      [&md](int, int) { return md->num_entities(entity_kind::vertices); });
+      [&md](int, int) { return md->num_entities(index_space::vertices); });
 
     util::equal_map cem(global_cells, size);
     util::equal_map vem(global_vertices, size);
@@ -342,7 +420,7 @@ struct mesh
      *------------------------------------------------------------------------*/
 
     auto [c2v, finfo, minfo] = util::mpi::one_to_alli(
-      [&md, &cem ](int r, int) -> auto { return md->cell_data(cem[r]); });
+      [&md, &cem](int r, int) -> auto { return md->cell_data(cem[r]); });
 
     /*------------------------------------------------------------------------*
       Create cell-to-cell graph.
@@ -385,7 +463,7 @@ struct mesh
     // clang-format off
     auto [vdeps, cshr, cghst, crghost, c2co, color_peers, cell_pcdata] =
       clr::close_cells(cem, pem, cell_raw, cells, cog2l, 1, c2v, finfo, minfo, cp2m,
-        cm2p, c2c, v2c, coloring, entity_kind::cells);
+        cm2p, c2c, v2c, coloring, index_space::cells);
     // clang-format on
 
     /*------------------------------------------------------------------------*
@@ -394,7 +472,7 @@ struct mesh
 
     std::map<util::gid, Color> v2co;
     for(std::uint32_t lco{0}; lco < cog2l.size(); ++lco) {
-      auto const & pc = coloring.idx_spaces[entity_kind::cells].colors[lco];
+      auto const & pc = coloring.idx_spaces[index_space::cells].colors[lco];
 
       for(auto c_lid /* local cell id */ : pc.owned()) {
         util::gid c = cell_pcdata[lco].all[c_lid]; // global cell id
@@ -414,9 +492,8 @@ struct mesh
       vertices[vem.bin(v)].push_back({v, co});
     } // for
 
-    auto rank_colors =
-      util::mpi::all_to_allv([&vertices](
-                               int r, int) -> auto & { return vertices[r]; });
+    auto rank_colors = util::mpi::all_to_allv(
+      [&vertices](int r, int) -> auto & { return vertices[r]; });
 
     std::vector<Color> vertex_raw;
     const auto vr = vem[rank];
@@ -428,7 +505,7 @@ struct mesh
     } // for
 
     auto [coords, binfo] = util::mpi::one_to_alli(
-      [&md, &vem ](int r, int) -> auto { return md->vertex_data(vem[r]); });
+      [&md, &vem](int r, int) -> auto { return md->vertex_data(vem[r]); });
 
     /*------------------------------------------------------------------------*
       Migrate the vertex data to the owning processes.
@@ -443,7 +520,7 @@ struct mesh
       connectivity;
 
     connectivity.resize(policy<D>::num_index_spaces());
-    for(uint32_t from = 0; from < policy<D>::num_index_spaces(); ++from) {
+    for(int from = 0; from < policy<D>::num_index_spaces(); ++from) {
       connectivity[from].resize(pem[rank].size());
       for(auto & cnx : connectivity[from]) {
         cnx.resize(policy<D>::num_index_spaces());
@@ -458,7 +535,7 @@ struct mesh
     // clang-format off
     auto [vertex_pcdata] = clr::close_vertices(vem, pem, v2co, vdeps, cells,
                                                c2v, cm2p, vertex_raw, cell_pcdata, cog2l, coords, binfo, vm2p, vp2m, coloring,
-      connectivity, color_peers, entity_kind::cells, entity_kind::vertices);
+      connectivity, color_peers, index_space::cells, index_space::vertices);
     // clang-format on
 
     if constexpr(D != 1) {
@@ -467,7 +544,7 @@ struct mesh
        *----------------------------------------------------------------------*/
 
       std::vector<util::gid> cfa;
-      auto const & cclr = coloring.idx_spaces[entity_kind::cells];
+      auto const & cclr = coloring.idx_spaces[index_space::cells];
       {
         util::id lco{0};
         for(auto const & index_coloring : cclr.colors) {
@@ -523,8 +600,8 @@ struct mesh
         Mapping variables for whatever auxiliaries are created.
        *------------------------------------------------------------------------*/
 
-      std::map<entity_kind, util::crs> auxmap;
-      std::map<entity_kind, std::vector<clr::process_color_data> &>
+      std::map<index_space, util::crs> auxmap;
+      std::map<index_space, std::vector<clr::process_color_data> &>
         other_pcdata;
 
       /*------------------------------------------------------------------------*
@@ -533,13 +610,13 @@ struct mesh
 
       // clang-format off
       auto [c2i, i2d, ia2a, il2g, ig2l, i_pcdata] =
-        clr::add_auxiliaries<D, io::interface_kind<D>(), clr::heuristic::cells>(
+        clr::add_auxiliaries<policy, D, policy<D>::interfaces, clr::heuristic::cells>(
           pem, cfa, c2v, cm2p, cfam2p, cfap2m, cshr, cghst, coloring, cog2l,
           col2g, c2co, v2co, auxmap, lcn, cell_pcdata, vertex_pcdata);
 
-      auxmap.try_emplace(io::interface_kind<D>(), c2i);
-      other_pcdata.emplace(io::interface_kind<D>(), i_pcdata);
-      clr::convert_connectivity<D, io::interface_kind<D>()>(
+      auxmap.try_emplace(policy<D>::interfaces, c2i);
+      other_pcdata.emplace(policy<D>::interfaces, i_pcdata);
+      clr::convert_connectivity<policy, D, policy<D>::interfaces>(
         cell_pcdata, vertex_pcdata, other_pcdata, pem[rank].size(), c2i, i2d,
         ia2a, cm2p, cfam2p, ig2l, connectivity);
       // clang-format on
@@ -550,7 +627,7 @@ struct mesh
 
       if constexpr(D == 3) {
         auto [c2e, e2d, ea2a, el2g, eg2l, e_pcdata] =
-          clr::add_auxiliaries<D, entity_kind::edges>(pem,
+          clr::add_auxiliaries<policy, D, policy<D>::edges>(pem,
             cfa,
             c2v,
             cm2p,
@@ -568,9 +645,9 @@ struct mesh
             cell_pcdata,
             vertex_pcdata);
 
-        auxmap.try_emplace(entity_kind::edges, c2e);
-        other_pcdata.emplace(entity_kind::edges, e_pcdata);
-        clr::convert_connectivity<D, entity_kind::edges>(cell_pcdata,
+        auxmap.try_emplace(index_space::edges, c2e);
+        other_pcdata.emplace(index_space::edges, e_pcdata);
+        clr::convert_connectivity<policy, D, policy<D>::edges>(cell_pcdata,
           vertex_pcdata,
           other_pcdata,
           pem[rank].size(),
@@ -593,20 +670,20 @@ struct mesh
     user_data.coords = {coords};
 
     user_data.c2v = clr::get_connectivity(
-      connectivity, entity_kind::cells, entity_kind::vertices);
+      connectivity, index_space::cells, index_space::vertices);
 
     if constexpr(D == 2 || D == 3) {
       user_data.c2e = clr::get_connectivity(
-        connectivity, entity_kind::cells, entity_kind::edges);
+        connectivity, index_space::cells, index_space::edges);
       user_data.e2v = clr::get_connectivity(
-        connectivity, entity_kind::edges, entity_kind::vertices);
+        connectivity, index_space::edges, index_space::vertices);
     } // if
 
     if constexpr(D == 3) {
       user_data.c2f = clr::get_connectivity(
-        connectivity, entity_kind::cells, entity_kind::faces);
+        connectivity, index_space::cells, index_space::faces);
       user_data.f2v = clr::get_connectivity(
-        connectivity, entity_kind::faces, entity_kind::vertices);
+        connectivity, index_space::faces, index_space::vertices);
     } // if
 
     /*------------------------------------------------------------------------*
@@ -649,8 +726,8 @@ struct mesh
    *--------------------------------------------------------------------------*/
 
   static void initialize(flecsi::data::topology_slot<mesh<D>> & s,
-    coloring const & c,
-    const policy<D>::user_data & user_data) {
+    coloring const &,
+    const policy<D>::user_data &) {
 
     /*------------------------------------------------------------------------*
       Resize connectivity storage.

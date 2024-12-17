@@ -5,9 +5,7 @@
  * Exodus definition adapted from implementation by Marc Charest.
  */
 
-#include "flsp/config.hh"
 #include "flsp/unstructured/io/definition_base.hh"
-#include "flsp/unstructured/io/types.hh"
 
 #include <exodusII.h>
 
@@ -540,12 +538,15 @@ read_block(int exoid,
 }
 
 } // namespace detail
+
 /*----------------------------------------------------------------------------*
  * Base
  *----------------------------------------------------------------------------*/
 
-template<std::size_t D>
-struct exodus_definition : definition_base<D> {
+template<template<std::size_t> typename P,
+  std::size_t D,
+  typename = typename std::enable_if<(D == 1) || (D == 2) || (D == 3)>::type>
+struct exodus_definition : definition_base<P, D> {
   using index = std::size_t;
   static constexpr std::size_t CHUNK_SIZE = 256;
   using id = std::size_t;
@@ -610,15 +611,96 @@ struct exodus_definition : definition_base<D> {
 
   template<class VID>
   void build_intermediary_from_vertices(flecsi::Dimension idim,
-    std::size_t,
+    std::size_t cell,
     const std::vector<VID> & verts,
-    util::crs & inter) const;
+    util::crs & inter) const {
+    if constexpr(D == 1) {
+      flog_assert(idim == 1, "Invalid dimension: " << idim);
+      for(auto v0 = verts.begin(), v1 = std::next(v0); v0 != verts.end();
+          ++v0, ++v1) {
+        if(v1 == verts.end()) {
+          v1 = verts.begin();
+        } // if
+        inter.add_row({*v0, *v1});
+      } // for
+    }
+    else if constexpr(D == 2) {
+      if(idim == 1) { // edges and faces
+        for(auto v0 = verts.begin(), v1 = std::next(v0); v0 != verts.end();
+            ++v0, ++v1) {
+          if(v1 == verts.end()) {
+            v1 = verts.begin();
+          } // if
+          inter.add_row({*v0, *v1});
+        } // for
+      }
+      else if(idim == 4 /*D + 2*/) { // corners
+        for(auto v : verts) {
+          inter.add_row({v});
+        } // for
+      }
+      else {
+        flog_fatal("invalid dimension: " << idim);
+      } // if
+    }
+    else /* D == 3 */ {
+      if(idim == 1 || idim == 2) { // edges or faces
+        // TODO: make more efficient (reduce amount of block lookups)
+        auto loc = blk_cursor->find_entity(cell);
+        auto btype = blk_cursor->get_block_type(loc.block);
+        const int * side_indices = nullptr;
+        int num_sides = 0;
+        int num_side_points = 0;
+        int side_size = 0;
+        if(btype == detail::block_t::hex) {
+          side_indices = &detail::hex_table[0][0];
+          num_sides = detail::hex_sides;
+          side_size = detail::hex_size;
+          num_side_points = 4;
+        }
+        else if(btype == detail::block_t::tet) {
+          side_indices = &detail::tetra_table[0][0];
+          num_sides = detail::tetra_sides;
+          side_size = detail::tetra_size;
+          num_side_points = 3;
+        } // if
+        std::vector<index> temp_vs(num_side_points);
 
-  util::gid num_entities(entity_kind<D> k) const override {
-    flog_assert(k == entity_kind<D>::cells || k == entity_kind<D>::vertices,
-      "invalid entity_kind");
-    return k == entity_kind<D>::vertices ? exo_params.num_nodes
-                                         : exo_params.num_elem;
+        for(int i = 0; i < num_sides; ++i) {
+          for(int j = 0; j < num_side_points; ++j) {
+            auto id = side_indices[i * side_size + j] - 1;
+            temp_vs[j] = verts[id];
+          } // for
+
+          if(idim == 2) {
+            // faces
+            inter.add_row(temp_vs.begin(), temp_vs.end());
+          }
+          else {
+            // edges
+            for(auto v0 = std::prev(temp_vs.end()), v1 = temp_vs.begin();
+                v1 != temp_vs.end();
+                v0 = v1, ++v1)
+              inter.add_row({*v0, *v1});
+          } // if
+        } // for
+      }
+      else if(idim == 5 /*D + 2*/) { // corners
+        // One corner for each vertex of the cell
+        for(auto v : verts) {
+          inter.add_row({v});
+        }
+      }
+      else {
+        flog_fatal("Invalid dimension: " << idim);
+      } // if
+    } // if
+  } // build_intermedieary_from_vertices
+
+  util::gid num_entities(P<D>::index_space is) const override {
+    flog_assert(
+      is == P<D>::cells || is == P<D>::vertices, "invalid index space");
+    return is == P<D>::vertices ? exo_params.num_nodes : exo_params.num_elem;
   }
 
   std::tuple<std::vector<util::point<D>>, std::optional<bnd_ids>> vertex_data(
@@ -759,119 +841,8 @@ protected:
   mutable std::unique_ptr<detail::vcursor> vert_cursor;
 }; // struct exodus_definition
 
-/*----------------------------------------------------------------------------*
- * 1D
- *----------------------------------------------------------------------------*/
-
-template<>
-template<class VID>
-void
-exodus_definition<1>::build_intermediary_from_vertices(flecsi::Dimension idim,
-  std::size_t,
-  const std::vector<VID> & verts,
-  util::crs & inter) const {
-  flog_assert(idim == 1, "Invalid dimension: " << idim);
-  for(auto v0 = verts.begin(), v1 = std::next(v0); v0 != verts.end();
-      ++v0, ++v1) {
-    if(v1 == verts.end())
-      v1 = verts.begin();
-    inter.add_row({*v0, *v1});
-  }
-}
-
-/*----------------------------------------------------------------------------*
- * 2D
- *----------------------------------------------------------------------------*/
-
-template<>
-template<class VID>
-void
-exodus_definition<2>::build_intermediary_from_vertices(flecsi::Dimension idim,
-  std::size_t,
-  const std::vector<VID> & verts,
-  util::crs & inter) const {
-  if(idim == 1) { // edges and faces
-    for(auto v0 = verts.begin(), v1 = std::next(v0); v0 != verts.end();
-        ++v0, ++v1) {
-      if(v1 == verts.end())
-        v1 = verts.begin();
-      inter.add_row({*v0, *v1});
-    }
-  }
-  else if(idim == 4 /*D + 2*/) { // corners
-    for(auto v : verts) {
-      inter.add_row({v});
-    }
-  }
-  else {
-    flog_fatal("Invalid dimension: " << idim);
-  }
-}
-
-/*----------------------------------------------------------------------------*
- * 3D
- *----------------------------------------------------------------------------*/
-
-template<>
-template<class VID>
-void
-exodus_definition<3>::build_intermediary_from_vertices(flecsi::Dimension idim,
-  std::size_t cell,
-  const std::vector<VID> & verts,
-  util::crs & inter) const {
-  if(idim == 1 || idim == 2) { // edges or faces
-    // TODO: make more efficient (reduce amount of block lookups)
-    auto loc = blk_cursor->find_entity(cell);
-    auto btype = blk_cursor->get_block_type(loc.block);
-    const int * side_indices = nullptr;
-    int num_sides = 0;
-    int num_side_points = 0;
-    int side_size = 0;
-    if(btype == detail::block_t::hex) {
-      side_indices = &detail::hex_table[0][0];
-      num_sides = detail::hex_sides;
-      side_size = detail::hex_size;
-      num_side_points = 4;
-    }
-    else if(btype == detail::block_t::tet) {
-      side_indices = &detail::tetra_table[0][0];
-      num_sides = detail::tetra_sides;
-      side_size = detail::tetra_size;
-      num_side_points = 3;
-    }
-    std::vector<index> temp_vs(num_side_points);
-
-    for(int i = 0; i < num_sides; ++i) {
-      for(int j = 0; j < num_side_points; ++j) {
-        auto id = side_indices[i * side_size + j] - 1;
-        temp_vs[j] = verts[id];
-      }
-      if(idim == 2) {
-        // faces
-        inter.add_row(temp_vs.begin(), temp_vs.end());
-      }
-      else {
-        // edges
-        for(auto v0 = std::prev(temp_vs.end()), v1 = temp_vs.begin();
-            v1 != temp_vs.end();
-            v0 = v1, ++v1)
-          inter.add_row({*v0, *v1});
-      }
-    }
-  }
-  else if(idim == 5 /*D + 2*/) { // corners
-    // One corner for each vertex of the cell
-    for(auto v : verts) {
-      inter.add_row({v});
-    }
-  }
-  else {
-    flog_fatal("Invalid dimension: " << idim);
-  }
-}
-
-template<std::size_t D>
-std::unique_ptr<definition_base<D>>
+template<template<std::size_t> typename P, std::size_t D>
+std::unique_ptr<definition_base<P, D>>
 exodus_handler(const std::string & fname,
   std::optional<std::vector<std::string>>,
   std::optional<std::vector<std::string>>,
@@ -879,21 +850,12 @@ exodus_handler(const std::string & fname,
   int rank;
   MPI_Comm_rank(comm, &rank);
   if(rank == 0) {
-    return std::make_unique<exodus_definition<D>>(fname);
+    return std::make_unique<exodus_definition<P, D>>(fname);
   }
   else {
-    return std::make_unique<undefined_definition<D>>();
+    return std::make_unique<undefined_definition<P, D>>();
   } // if
 }
-
-#if defined(FLECSI_SP_ENABLE_EXODUSII)
-const inline bool register_exodus_1d_ =
-  io_factory<1>::instance().register_type("exo", exodus_handler<1>);
-const inline bool register_exodus_2d_ =
-  io_factory<2>::instance().register_type("exo", exodus_handler<2>);
-const inline bool register_exodus_3d_ =
-  io_factory<3>::instance().register_type("exo", exodus_handler<3>);
-#endif
 
 } // namespace flsp::unstructured::io
 

@@ -56,4 +56,31 @@ mesh_initialization() {
   };
 } // mesh_initialization
 
+const inline bool register_simple_1d =
+  io::io_factory<policy, 1>::instance().register_type("msh",
+    io::simple_handler<policy, 1>);
+const inline bool register_simple_2d =
+  io::io_factory<policy, 2>::instance().register_type("msh",
+    io::simple_handler<policy, 2>);
+const inline bool register_simple_3d =
+  io::io_factory<policy, 3>::instance().register_type("msh",
+    io::simple_handler<policy, 3>);
+
+const inline bool register_x3d_1d =
+  io::io_factory<policy, 2>::instance().register_type("x3d",
+    io::x3d_handler<policy, 2>);
+const inline bool register_x3d_2d =
+  io::io_factory<policy, 3>::instance().register_type("x3d",
+    io::x3d_handler<policy, 3>);
+
+const inline bool register_exodusii_1d =
+  io::io_factory<policy, 1>::instance().register_type("exo",
+    io::exodus_handler<policy, 1>);
+const inline bool register_exodusii_2d =
+  io::io_factory<policy, 2>::instance().register_type("exo",
+    io::exodus_handler<policy, 2>);
+const inline bool register_exodusii_3d =
+  io::io_factory<policy, 3>::instance().register_type("exo",
+    io::exodus_handler<policy, 3>);
+
 flecsi::util::unit::driver<mesh_initialization> driver;

@@ -4,24 +4,10 @@
 #include "flsp/unstructured/clr/coloring_functors.hh"
 #include "flsp/unstructured/io/definition_base.hh"
 #include "flsp/unstructured/io/models.hh"
-#include "flsp/unstructured/util/common.hh"
 
-#include <flecsi/flog.hh>
 #include <flecsi/topo/unstructured/types.hh>
 
-#include <mpi.h>
-
-#include <algorithm>
-#include <cstdint>
-#include <optional>
-
-/// \cond core
 namespace flsp::unstructured::clr {
-/// \addtogroup mesh
-/// \{
-
-template<std::size_t D>
-using entity_kind = io::entity_kind<D>;
 
 using coloring = flecsi::topo::unstructured_base::coloring;
 
@@ -535,11 +521,17 @@ close_cells(util::equal_map const & cem,
       ++r;
     } // for
 
-    // clang-format off
     auto fulfilled = util::mpi::all_to_allv<communicate_cells>(
-      {fulfill, dependents, c2co, c2v, d < depth ? finfo : std::nullopt,
-        d < depth ? minfo : std::nullopt, c2c, v2c, m2p}, comm);
-    // clang-format on
+      {fulfill,
+        dependents,
+        c2co,
+        c2v,
+        d < depth ? finfo : std::nullopt,
+        d < depth ? minfo : std::nullopt,
+        c2c,
+        v2c,
+        m2p},
+      comm);
 
     std::set<util::gid> lf;
     if(finfo.has_value()) {
@@ -672,7 +664,7 @@ close_cells(util::equal_map const & cem,
     */
 
     std::vector</* by process */ std::vector<util::id>> fulfills;
-    for(const auto &rv : util::mpi::all_to_allv(
+    for(const auto & rv : util::mpi::all_to_allv(
           [&sources](int r, int) -> auto & { return sources[r]; }, comm)) {
       auto & f = fulfills.emplace_back();
       for(const auto id : rv)
@@ -685,9 +677,8 @@ close_cells(util::equal_map const & cem,
 
     {
       auto pgi = process_ghosts.begin();
-      for(const auto &ans : util::mpi::all_to_allv(
-            [f = std::move(fulfills)](int r, int) { return std::move(f[r]); },
-            comm)) {
+      for(const auto & ans : util::mpi::all_to_allv(
+            [f = fulfills](int r, int) { return f[r]; }, comm)) {
         auto ai = ans.begin();
         for(auto & [lco, e /* global id */] : *pgi++)
           cell_color.colors[lco].peers[c2co.at(e)].ghost[*ai++] =
@@ -768,10 +759,10 @@ close_vertices(util::equal_map const & vem,
   std::vector<Color> const & raw,
   std::vector<process_primary_color_data> const & cell_pcdata,
   std::map<Color, std::uint32_t> const & cog2l,
-  std::vector<util::point<D>> & coords,
-  std::optional<io::bnd_ids> & binfo,
-  std::map<util::gid, util::id> & vm2p,
-  std::vector<util::gid> & vp2m,
+  std::vector<util::point<D>> &,
+  std::optional<io::bnd_ids> &,
+  std::map<util::gid, util::id> &,
+  std::vector<util::gid> &,
   coloring & clrng,
   std::vector<std::vector<std::vector<util::crs>>> & connectivity,
   std::vector<std::set<Color>> & color_peers,
@@ -800,7 +791,6 @@ close_vertices(util::equal_map const & vem,
       auto primary = clrng.idx_spaces[cidx].colors[lco];
       auto & vertex_pcd = vertex_pcdata[lco];
       auto & primary_pcd = cell_pcdata[lco];
-      auto & offsets = vertex_pcdata[lco].offsets;
 
       // Go through the shared primaries and look for ghosts. Some of these
       // may be on the local processor, i.e., we don't need to request
@@ -921,7 +911,6 @@ close_vertices(util::equal_map const & vem,
     // Build local vertex offsets
     for(auto const & [co, cs] : cells) {
       const auto lco = cog2l.at(co);
-      auto & ic = vert_color.colors[lco];
       auto & vertex_pcd = vertex_pcdata[lco];
       auto & offsets = vertex_pcd.offsets;
 
@@ -998,7 +987,7 @@ close_vertices(util::equal_map const & vem,
    */
 
   std::vector<std::vector<util::id>> fulfills;
-  for(const auto &rv : util::mpi::all_to_allv(
+  for(const auto & rv : util::mpi::all_to_allv(
         [&sources](int r, int) -> auto & { return sources[r]; }, comm)) {
     auto & f = fulfills.emplace_back();
     for(const auto id : rv)
@@ -1011,9 +1000,8 @@ close_vertices(util::equal_map const & vem,
 
   {
     auto pgi = process_ghosts.begin();
-    for(const auto &ans : util::mpi::all_to_allv(
-          [f = std::move(fulfills)](int r, int) { return std::move(f[r]); },
-          comm)) {
+    for(const auto & ans : util::mpi::all_to_allv(
+          [f = fulfills](int r, int) { return f[r]; }, comm)) {
       auto ai = ans.begin();
       for(auto & [lco, e] : *pgi++)
         vert_color.colors[lco].peers[v2co.at(e)].ghost[*ai++] =
@@ -1061,103 +1049,13 @@ close_vertices(util::equal_map const & vem,
   return std::make_tuple(vertex_pcdata);
 } // close_vertices
 
-template<std::size_t D, entity_kind<D> K>
-constexpr std::size_t
-unsorted() {
-  if constexpr(D == 1) {
-    return 0;
-  }
-  else if constexpr(D == 2) {
-    if constexpr(K == entity_kind<D>::edges) {
-      return 0;
-    }
-    else if(K == entity_kind<D>::sides) {
-      /* v0, v1, unsorted(c) */
-      return 1;
-    }
-    else if(K == entity_kind<D>::corners) {
-      /* v, unsorted(c) */
-      return 1;
-    }
-  }
-  else /* D == 3 */ {
-    if constexpr(K == entity_kind<D>::edges) {
-      return 0;
-    }
-    else if(K == entity_kind<D>::faces) {
-      return 0;
-    }
-    else if(K == entity_kind<D>::sides) {
-      /* v0, v1, unsorted(f, c) */
-      return 2;
-    }
-    else if(K == entity_kind<D>::corners) {
-      /* v, unsorted(c) */
-      return 1;
-    } // if
-  } // if
-} // unsorted
-
-template<std::size_t D, entity_kind<D> K>
-constexpr bool
-subcell() {
-  return K == entity_kind<D>::sides || K == entity_kind<D>::corners;
-} // subcell
-
-template<std::size_t D, entity_kind<D> K>
-std::string
-entity_kind_name() {
-  if constexpr(D == 1) {
-    switch(K) {
-      case entity_kind<D>::cells:
-        return "cells";
-      case entity_kind<D>::vertices:
-        return "vertices";
-      default:
-        flog_fatal("invalid entity kind");
-    } // switch
-  }
-  else if constexpr(D == 2) {
-    switch(K) {
-      case entity_kind<D>::cells:
-        return "cells";
-      case entity_kind<D>::vertices:
-        return "vertices";
-      case entity_kind<D>::edges:
-        return "edges";
-      case entity_kind<D>::sides:
-        return "sides";
-      case entity_kind<D>::corners:
-        return "corners";
-      default:
-        flog_fatal("invalid entity kind");
-    } // switch
-  }
-  else /* D == 3 */ {
-    switch(K) {
-      case entity_kind<D>::cells:
-        return "cells";
-      case entity_kind<D>::vertices:
-        return "vertices";
-      case entity_kind<D>::edges:
-        return "edges";
-      case entity_kind<D>::faces:
-        return "faces";
-      case entity_kind<D>::sides:
-        return "sides";
-      case entity_kind<D>::corners:
-        return "corners";
-      default:
-        flog_fatal("invalid entity kind");
-    } // switch
-  } // if
-} // entity_kind_name
-
 /*!
-  Create auxiliary entities of the specified kind @em K for the given set of
-  cells.
+  Create auxiliary entities of the specified policy @em P and index space @em IS
+  for the given set of cells.
 
-  @tparam K The entity_kind to create.
+  @tparam P  The policy definition.
+  @tparam D  The spatial dimension.
+  @tparam IS The index space.
 
   @param cells A cells for which a unique set of auxiliaries will be created.
   @param c2v   Cell-to-vertex connectivity for (at least) the cells specified
@@ -1167,27 +1065,27 @@ entity_kind_name() {
                auxiliary kinds (std::optional), e.g., sides require
                cell-to-face information in 3D.
  */
-template<std::size_t D, entity_kind<D> K>
+template<template<std::size_t> typename P, std::size_t D, P<D>::index_space IS>
 auto
 create_auxiliaries(std::vector<util::gid> const & cells,
   util::crs const & c2v,
   std::map<util::gid, util::id> cm2p,
   std::map<util::gid, util::id> cfam2p,
-  std::map<entity_kind<D>, util::crs> const & aux,
+  std::map<typename P<D>::index_space, util::crs> const & aux,
   const std::optional<util::crs> & i2d = std::nullopt,
   const std::optional<std::map<util::gid, util::id>> & ig2l = std::nullopt) {
 
   util::crs a2d;
   util::crs c2a;
-  std::map<entity_kind<D>, util::crs> a2a;
+  std::map<typename P<D>::index_space, util::crs> a2a;
   std::map<std::vector<util::gid>, util::gid> def2a;
   std::vector<util::gid> sorted;
   std::vector<util::gid> these;
-  static constexpr std::size_t uv = unsorted<D, K>();
+  static constexpr std::size_t uv = P<D>::template unsorted<IS>();
 
   for(auto c : cells) {
     these.clear();
-    auto [ce, ca2a] = io::create_cell_entities<D, K>(
+    auto [ce, ca2a] = io::create_cell_entities<P, D, IS>(
       std::make_tuple(c, cm2p.at(c), cfam2p.at(c)), c2v, aux, i2d, ig2l);
 
     std::size_t i{0};
@@ -1213,7 +1111,7 @@ create_auxiliaries(std::vector<util::gid> const & cells,
         // This is an existing auxiliary -> it was created by a different cell,
         // so its orientation is reversed.
         these.push_back(
-          K == io::interface_kind<D>() ? ~it.first->second : it.first->second);
+          IS == P<D>::interfaces ? ~it.first->second : it.first->second);
       } // if
 
       ++i;
@@ -1233,7 +1131,7 @@ enum class heuristic { vertices, cells };
 /*!
   Assign colors to local auxiliaries using cell or vertex coloring information.
 
-  @tparam K Specify the entity_kind.
+  @tparam P Specify the policy.
   @tparam H Specify the heuristic to use to assign colors. Note this parameter
             only applies to non-subcell entities. Subcell entities always use
             the enclosing cell's color.
@@ -1250,7 +1148,10 @@ enum class heuristic { vertices, cells };
   @param c2co  Cell-to-color map.
   @param v2co  Vertex-to-color map.
  */
-template<std::size_t D, entity_kind<D> K, heuristic H = heuristic::vertices>
+template<template<std::size_t> typename P,
+  std::size_t D,
+  P<D>::index_space IS,
+  heuristic H = heuristic::vertices>
 auto
 color_local_auxiliaries(util::crs const & lc2a,
   util::crs const & la2d,
@@ -1282,7 +1183,7 @@ color_local_auxiliaries(util::crs const & lc2a,
   util::gid cnt{0};
 
   util::id lco{0};
-  for(auto const & pc : clrng.idx_spaces[entity_kind<D>::cells].colors) {
+  for(auto const & pc : clrng.idx_spaces[P<D>::cells].colors) {
     auto gco = col2g[lco];
     for(util::id c_lid{0}; c_lid < pc.entities; ++c_lid) {
       util::gid c = cell_pcdata[lco].all[c_lid];
@@ -1294,7 +1195,7 @@ color_local_auxiliaries(util::crs const & lc2a,
         auto const anc /* id without complement */ = util::get_id(a);
         bool halo{false};
         Color co = std::numeric_limits<Color>::max();
-        if constexpr(subcell<D, K>()) {
+        if constexpr(P<D>::template subcell<IS>()) {
           co = c2co.at(c);
         }
         else {
@@ -1303,7 +1204,7 @@ color_local_auxiliaries(util::crs const & lc2a,
               co = std::min(v2co.at(v), co);
             } // for
           }
-          else if constexpr(H == heuristic::cells) {
+          else /* H == heuristic::cells */ {
             for(auto ci : a2c[anc]) {
               co = std::min(c2co.at(ci), co);
             } // for
@@ -1383,13 +1284,13 @@ assign_global_ids(util::gid cnt, MPI_Comm comm = MPI_COMM_WORLD) {
 /*!
   Assign colors and global ids to the auxiliaries with index @em aidx.
  */
-template<std::size_t D, entity_kind<D> K>
+template<template<std::size_t> typename P, std::size_t D, P<D>::index_space IS>
 auto
 color_auxiliaries(util::equal_map const & pem,
   util::gid cnt,
   util::crs const & lc2a,
   util::crs const & la2d,
-  std::map<entity_kind<D>, util::crs> const & la2a,
+  std::map<typename P<D>::index_space, util::crs> const & la2a,
   std::map<util::gid,
     std::pair<std::set<Color>, std::vector<util::gid>>> const & ghost,
   std::map<Color, std::map<util::gid, std::set<Color>>> & ldependents,
@@ -1407,7 +1308,7 @@ color_auxiliaries(util::equal_map const & pem,
   std::vector<std::map<std::vector<util::gid>, std::pair<util::id, util::gid>>>
     shared(cog2l.size());
   std::vector<util::gid> sorted;
-  static constexpr std::size_t uv = unsorted<D, K>();
+  static constexpr std::size_t uv = P<D>::template unsorted<IS>();
   std::vector<util::gid> l2g(
     a2co.size(), std::numeric_limits<util::gid>::max());
   for(auto && [lid, info] : a2co) {
@@ -1480,8 +1381,8 @@ color_auxiliaries(util::equal_map const & pem,
 
       auto it = shared[cog2l.at(oco)].find(sorted);
       flog_assert(it != shared[cog2l.at(oco)].end(),
-        "invalid auxiliary definition (entity_kind: "
-          << (entity_kind_name<D, K>()) << ")\n"
+        "invalid auxiliary definition (index space: "
+          << (P<D>::template entity_kind_name<IS>()) << ")\n"
           << flog::container{sorted});
 
       fulfill[pr].emplace_back(std::make_tuple(
@@ -1579,15 +1480,15 @@ close_auxiliaries(util::equal_map const & pem,
   std::map<Color, util::id> const & cog2l,
   util::gid num_auxiliaries,
   std::map<util::gid, std::pair<Color, bool>> const & a2co,
-  std::vector<util::gid> const & al2g,
+  std::vector<util::gid> const &,
   std::map<util::gid, util::id> const & ag2l,
   std::map<Color, std::map<util::gid, std::set<Color>>> const & dependents,
   std::map<Color, std::map<util::gid, std::set<Color>>> const & dependencies,
   coloring & clrng,
-  std::vector<process_primary_color_data> const & cell_pcdata,
-  std::vector<process_color_data> const & vertex_pcdata,
+  std::vector<process_primary_color_data> const &,
+  std::vector<process_color_data> const &,
   util::id aidx,
-  bool reorder = true,
+  bool reorder = false,
   MPI_Comm comm = MPI_COMM_WORLD) {
   auto [rank, size] = util::mpi::info(comm);
 
@@ -1597,26 +1498,13 @@ close_auxiliaries(util::equal_map const & pem,
 
   std::vector<std::vector<util::gid>> sources(size);
   std::vector<std::vector<std::pair<Color, util::gid>>> process_ghosts(size);
-
   std::vector<std::set<util::gid>> pclo(cog2l.size());
   std::vector<std::set<Color>> peers(cog2l.size());
-
   std::vector<std::set<Color>> color_peers_(cog2l.size());
-
-  // if(auxs_.size()) {
-  //   for(std::size_t lco = 0; lco < cog2l.size(); ++lco) {
-  //     pclo[lco].insert(
-  //       primary_pcdata[lco].all.begin(), primary_pcdata[lco].all.end());
-  //   }
-  // }
-
   std::vector<process_color_data> aux_pcdata(cog2l.size());
 
   for(auto const & [gco, lco] : cog2l) {
     auto & aux_pcd = aux_pcdata[lco];
-    auto & primary_pcd = cell_pcdata[lco];
-    auto & vertex_pcd = vertex_pcdata[lco];
-    // auto & cnx = connectivity(idx)[lco];
     auto & cp = color_peers_[lco];
     auto & offsets = aux_pcd.offsets;
 
@@ -1625,19 +1513,6 @@ close_auxiliaries(util::equal_map const & pem,
 
       if(gco == co) {
         aux_pcd.owned.emplace_back(gid);
-
-        // cnx[cell_index()].add_row(
-        //   util::transform_view(aux.i2e[lid], primary_pcd.g2l()));
-        // cnx[vertex_index()].add_row(
-        //   util::transform_view(aux.i2v[lid], vertex_pcd.g2l()));
-        // for(auto & im : cd_.aidxs) {
-        //   auto it = aux.i2a.find(im.kind);
-        //   if(it != aux.i2a.end()) {
-        //     cnx[im.idx].add_row(util::transform_view(it->second[lid],
-        //     auxiliary_pcdata(im.kind)[lco].g2l()));
-        //   }
-        // }
-
         if(!dependents.empty() && dependents.at(co).count(gid)) {
           aux_pcd.shared.insert(gid);
           auto const & deps = dependents.at(co).at(gid);
@@ -1656,33 +1531,6 @@ close_auxiliaries(util::equal_map const & pem,
         sources[pr].emplace_back(gid);
         process_ghosts[pr].emplace_back(lco, gid);
         cp.insert(co);
-
-        // Only add auxiliary connectivity that is covered by
-        // the primary closure.
-        // std::vector<util::gid> pall;
-        // for(auto e : aux.i2e[lid]) {
-        //   if(pclo[lco].count(e)) {
-        //     pall.push_back(e);
-        //   } // if
-        // } // for
-
-        // if(pall.size()) {
-        //   cnx[cell_index()].add_row(
-        //                             flecsi::util::transform_view(pall,
-        //                             primary_pcd.g2l()));
-        // }
-
-        // cnx[vertex_index()].add_row(
-        //                             flecsi::util::transform_view(aux.i2v[lid],
-        //                             vertex_pcd.g2l()));
-
-        // for(auto & im : cd_.aidxs) {
-        //   auto it = aux.i2a.find(im.kind);
-        //   if(it != aux.i2a.end()) {
-        //     cnx[im.idx].add_row(flecsi::util::transform_view(it->second[lid],
-        //     auxiliary_pcdata(im.kind)[lco].g2l()));
-        //   }
-        // }
       }
     }
 
@@ -1732,7 +1580,7 @@ close_auxiliaries(util::equal_map const & pem,
    */
 
   std::vector<std::vector<util::id>> fulfills;
-  for(const auto &rv : util::mpi::all_to_allv(
+  for(const auto & rv : util::mpi::all_to_allv(
         [&sources](int r, int) -> auto & { return sources[r]; }, comm)) {
     auto & f = fulfills.emplace_back();
     for(const auto id : rv)
@@ -1746,9 +1594,8 @@ close_auxiliaries(util::equal_map const & pem,
 
   {
     auto pgi = process_ghosts.begin();
-    for(const auto &ans : util::mpi::all_to_allv(
-          [f = std::move(fulfills)](int r, int) { return std::move(f[r]); },
-          comm)) {
+    for(const auto & ans : util::mpi::all_to_allv(
+          [f = fulfills](int r, int) { return f[r]; }, comm)) {
       auto ai = ans.begin();
       for(auto & [lco, e] : *pgi++)
         aux_color.colors[lco].peers[a2co.at(ag2l.at(e)).first].ghost[*ai++] =
@@ -1811,71 +1658,18 @@ close_auxiliaries(util::equal_map const & pem,
 
   compute_interval_sizes(clrng.idx_spaces[aidx], pem.total(), comm);
 
-#if 0
-  for(auto const & [co, lco] : cog2l) {
-    auto & ac = clrng.idx_spaces[aidx].colors[lco];
-    ac.entities = num_auxiliaries;
-  } // for
-
-  std::map<Color, std::set<Color>> peers;
-  for(auto gid : al2g) {
-    auto const [aco, ha] = a2co.at(ag2l.at(gid));
-
-    for(auto [co, lco] : cog2l) {
-      auto & ac = clrng.idx_spaces[aidx].colors[lco];
-
-      bool const ownd = (co == aco);
-      bool const ghst = !ownd && dependencies.at(aco).count(gid) &&
-                        dependencies.at(aco).at(gid).count(co);
-
-      if(ownd) {
-        ac.coloring.owned.emplace_back(gid);
-
-        if(dependents.count(aco) && dependents.at(aco).count(gid)) {
-          auto const & deps = dependents.at(co).at(gid);
-          ac.coloring.shared.push_back({gid, {deps.begin(), deps.end()}});
-        }
-        else {
-          ac.coloring.exclusive.emplace_back(gid);
-        } // if
-      } // if
-
-      if(ghst) {
-        auto const [pr, li] = pem.invert(aco);
-        ac.coloring.ghost.push_back({gid, pr, Color(li), aco});
-
-        peers[lco].insert(aco);
-      } // if
-    } // for
-  } // for
-
-  std::vector<std::size_t> & partitions = clrng.partitions[aidx];
-  std::vector<std::vector<Color>> is_peers(cog2l.size());
-  for(auto [co, lco] : cog2l) {
-    auto & ac = clrng.idx_spaces[aidx][lco];
-    partitions.emplace_back(ac.coloring.all.size());
-
-    if(peers.count(lco)) {
-      is_peers[lco].resize(peers.at(lco).size());
-      std::copy(
-        peers.at(lco).begin(), peers.at(lco).end(), is_peers[lco].begin());
-      ac.peers.resize(peers.at(lco).size());
-      std::copy(peers.at(lco).begin(), peers.at(lco).end(), ac.peers.begin());
-    }
-  } // for
-
-  flecsi::topo::concatenate(partitions, pem.total(), comm);
-#endif
-  return std::move(aux_pcdata);
+  return aux_pcdata;
 } // close_auxiliaries
 
 /*!
-  Add auxiliary with entity_kind \em K.
+  Add auxiliary with index space \em IS.
 
-  @tparam K Specify the entity_kind.
-  @tparam H Specify the heuristic to use to assign colors. Note this parameter
-            only applies to non-subcell entities. Subcell entities always use
-            the enclosing cell's color.
+  @tparam P  Specify the policy.
+  @tparam D  Specify the spatial dimension.
+  @tparam IS Specify the spatial dimension.
+  @tparam H  Specify the heuristic to use to assign colors. Note this parameter
+             only applies to non-subcell entities. Subcell entities always use
+             the enclosing cell's color.
 
   @param pem    Process equal-map.
   @param cfa    Cell-for-auxilary (Footprint of cells for which to create
@@ -1893,7 +1687,10 @@ close_auxiliaries(util::equal_map const & pem,
   @param aux    Auxiliary kind that this auxiliary depends upon.
   @param lcn    Auxiliary information provided by the mesh format.
  */
-template<std::size_t D, entity_kind<D> K, heuristic H = heuristic::vertices>
+template<template<std::size_t> typename P,
+  std::size_t D,
+  P<D>::index_space IS,
+  heuristic H = heuristic::vertices>
 inline auto
 add_auxiliaries(util::equal_map const & pem,
   std::vector<util::gid> const & cfa,
@@ -1908,39 +1705,63 @@ add_auxiliaries(util::equal_map const & pem,
   std::vector<Color> const & col2g,
   std::map<util::gid, Color> const & c2co,
   std::map<util::gid, Color> const & v2co,
-  std::map<entity_kind<D>, util::crs> const & aux,
+  std::map<typename P<D>::index_space, util::crs> const & aux,
   std::optional<std::pair<util::crs, util::crs>> const & lcn,
   std::vector<process_primary_color_data> const & cell_pcdata,
   std::vector<process_color_data> const & vertex_pcdata,
   const std::optional<util::crs> & i2d = std::nullopt,
   const std::optional<std::map<util::gid, util::id>> & ig2l = std::nullopt) {
 
-  // clang-format off
   util::crs lc2a, la2d;
-  std::map<entity_kind<D>, util::crs> la2a;
+  std::map<typename P<D>::index_space, util::crs> la2a;
   if(lcn.has_value()) {
     std::tie(lc2a, la2d) = std::move(*lcn);
   }
   else {
     std::tie(lc2a, la2d, la2a) =
-      create_auxiliaries<D, K>(cfa, c2v, cm2p, cfam2p, aux, i2d, ig2l);
+      create_auxiliaries<P, D, IS>(cfa, c2v, cm2p, cfam2p, aux, i2d, ig2l);
   } // if
 
   auto [acnt, a2co, aghost, aldependents, aldependencies] =
-    color_local_auxiliaries<D, K, H>(lc2a, la2d, cog2l, col2g, cfap2m, cfam2p,
-      cshr, cghst, clrng, c2co, v2co, cell_pcdata);
+    color_local_auxiliaries<P, D, IS, H>(lc2a,
+      la2d,
+      cog2l,
+      col2g,
+      cfap2m,
+      cfam2p,
+      cshr,
+      cghst,
+      clrng,
+      c2co,
+      v2co,
+      cell_pcdata);
 
   auto [num_aux, c2a, a2d, a2a, al2g, ag2l, adependents, adependencies] =
-    color_auxiliaries<D, K>(pem, acnt, lc2a, la2d, la2a, aghost, aldependents,
-      aldependencies, cog2l, a2co, true);
+    color_auxiliaries<P, D, IS>(pem,
+      acnt,
+      lc2a,
+      la2d,
+      la2a,
+      aghost,
+      aldependents,
+      aldependencies,
+      cog2l,
+      a2co,
+      true);
 
-  constexpr bool reorder =
-    K != entity_kind<D>::faces &&
-      K != entity_kind<D>::corners && K != entity_kind<D>::sides;
-  
-  auto aux_pcdata = close_auxiliaries(pem, cog2l, num_aux, a2co, al2g, ag2l,
-    adependents, adependencies, clrng, cell_pcdata, vertex_pcdata, K, reorder);
-  // clang-format on
+  auto aux_pcdata = close_auxiliaries(pem,
+    cog2l,
+    num_aux,
+    a2co,
+    al2g,
+    ag2l,
+    adependents,
+    adependencies,
+    clrng,
+    cell_pcdata,
+    vertex_pcdata,
+    IS,
+    IS == P<D>::edges);
 
   return std::make_tuple(std::move(c2a),
     std::move(a2d),
@@ -1965,42 +1786,80 @@ get_connectivity(
     cnxs.push_back(cnx[to_idx]);
   }
   return cnxs;
-}
+} // get_connectivity
 
-template<std::size_t D, entity_kind<D> aux_kind>
-inline void
+template<template<std::size_t> typename P, std::size_t D, P<D>::index_space IS>
+inline std::enable_if_t<IS == P<D>::edges || IS == P<D>::faces, void>
 convert_connectivity(
   std::vector<process_primary_color_data> const & cell_pcdata,
   std::vector<process_color_data> const & vertex_pcdata,
-  std::map<entity_kind<D>, std::vector<process_color_data> &> const &
-    other_pcdata,
+  std::map<typename P<D>::index_space,
+    std::vector<process_color_data> &> const & other_pcdata,
   Color nlco,
   util::crs const & c2a,
   util::crs const & a2d,
-  std::map<entity_kind<D>, util::crs> const & a2a,
-  std::map<util::gid, util::id> const & cm2p,
+  std::map<typename P<D>::index_space, util::crs> const &,
+  std::map<util::gid, util::id> const &,
   std::map<util::gid, util::id> const & cfam2p,
   std::map<util::gid, util::id> const & ag2l,
   std::vector<std::vector<std::vector<util::crs>>> & connectivity) {
-
-  auto const & aux_pcdata = other_pcdata.at(aux_kind);
+  auto const & aux_pcdata = other_pcdata.at(IS);
 
   for(std::size_t lco = 0; lco < nlco; ++lco) {
     auto const & primary_pcd = cell_pcdata[lco];
     auto const & vertex_pcd = vertex_pcdata[lco];
     auto const & aux_pcd = aux_pcdata[lco];
-    auto const & face_pcd = other_pcdata.at(entity_kind<D>::faces)[lco];
-    auto const & corner_pcd = [&]() -> decltype(auto) {
-      if constexpr(aux_kind == entity_kind<D>::sides)
-        return other_pcdata.at(entity_kind<D>::corners)[lco];
-      else
-        return process_color_data();
-    }();
 
-    auto & crs_cell = connectivity[entity_kind<D>::cells][lco][aux_kind];
-    auto & crs_vert = connectivity[aux_kind][lco][entity_kind<D>::vertices];
-    auto & crs_faces = connectivity[aux_kind][lco][entity_kind<D>::faces];
-    auto & crs_corners = connectivity[aux_kind][lco][entity_kind<D>::corners];
+    auto & crs_cell = connectivity[P<D>::cells][lco][IS];
+    auto & crs_vert = connectivity[IS][lco][P<D>::vertices];
+    auto & crs_faces = connectivity[IS][lco][P<D>::faces];
+
+    for(auto egid : primary_pcd.all) {
+      crs_cell.add_row(flecsi::util::transform_view(c2a[cfam2p.at(egid)],
+        [&](util::gid g) { return aux_pcd.g2l()(util::get_id(g)); }));
+    } // for
+
+    for(auto agid : aux_pcd.all) {
+      const util::id alid = ag2l.at(agid);
+      std::vector<util::id> vertices;
+      std::vector<util::id> faces;
+      auto view = flecsi::util::transform_view(
+        a2d[alid], [&](util::gid g) { return vertex_pcd.g2l()(g); });
+      vertices.assign(view.begin(), view.end());
+      crs_vert.add_row(vertices);
+      crs_faces.add_row(faces);
+    } // for
+  } // for
+} // convert_connectivity
+
+template<template<std::size_t> typename P, std::size_t D, P<D>::index_space IS>
+inline std::enable_if_t<IS == P<D>::corners || IS == P<D>::sides, void>
+convert_connectivity(
+  std::vector<process_primary_color_data> const & cell_pcdata,
+  std::vector<process_color_data> const & vertex_pcdata,
+  std::map<typename P<D>::index_space,
+    std::vector<process_color_data> &> const & other_pcdata,
+  Color nlco,
+  util::crs const & c2a,
+  util::crs const & a2d,
+  std::map<typename P<D>::index_space, util::crs> const & a2a,
+  std::map<util::gid, util::id> const &,
+  std::map<util::gid, util::id> const & cfam2p,
+  std::map<util::gid, util::id> const & ag2l,
+  std::vector<std::vector<std::vector<util::crs>>> & connectivity) {
+
+  auto const & aux_pcdata = other_pcdata.at(IS);
+
+  for(std::size_t lco = 0; lco < nlco; ++lco) {
+    auto const & primary_pcd = cell_pcdata[lco];
+    auto const & vertex_pcd = vertex_pcdata[lco];
+    auto const & aux_pcd = aux_pcdata[lco];
+    auto const & face_pcd = other_pcdata.at(P<D>::faces)[lco];
+
+    auto & crs_cell = connectivity[P<D>::cells][lco][IS];
+    auto & crs_vert = connectivity[IS][lco][P<D>::vertices];
+    auto & crs_faces = connectivity[IS][lco][P<D>::faces];
+    auto & crs_corners = connectivity[IS][lco][P<D>::corners];
 
     for(auto egid : primary_pcd.all) {
       crs_cell.add_row(flecsi::util::transform_view(c2a[cfam2p.at(egid)],
@@ -2014,48 +1873,18 @@ convert_connectivity(
       auto view = flecsi::util::transform_view(
         a2d[alid], [&](util::gid g) { return vertex_pcd.g2l()(g); });
 
-      if constexpr(aux_kind == entity_kind<D>::sides) {
-        auto face_view =
-          flecsi::util::transform_view(a2a.at(entity_kind<D>::faces)[alid],
-            [&](util::gid g) { return face_pcd.g2l()(g); });
-        // auto corner_view = flecsi::util::transform_view(
-        //   a2a.at(entity_kind<D>::corners)[ag2l.at(agid)],
-        //   [&](util::gid g) { return corner_pcd.g2l()(g); });
+      if constexpr(IS == P<D>::sides) {
+        auto face_view = flecsi::util::transform_view(a2a.at(P<D>::faces)[alid],
+          [&](util::gid g) { return face_pcd.g2l()(g); });
 
         vertices.emplace_back(view[0]);
         vertices.emplace_back(view[1]);
         faces.emplace_back(face_view[0]);
-        // corners.emplace_back(corner_view[0]);
-        // corners.emplace_back(corner_view[1]);
-
-        // build side-corner connectivity
-        // const auto & c2cor =
-        // connectivity[entity_kind::cells][lco][entity_kind::corners]; const
-        // auto & cor2v =
-        // connectivity[entity_kind::corners][lco][entity_kind::vertices];
-        // util::id cid{0};
-        // for(const auto sides : crs_cell) {
-        //   if(std::find(sides.begin(), sides.end(), alid) != sides.end())
-        //   break;
-        //   ++cid;
-        // }
-        // flog_assert(cid < crs_cell.size(), "could not find cell associated
-        // with side"); for(const auto cor : c2cor[cid]) {
-        //   const auto vert_of_cor = cor2v[cor][0];
-        //   for(const auto v : vertices) {
-        //     if(v == vert_of_cor) {
-        //       corners.emplace_back(cor);
-        //       break;
-        //     }
-        //   }
-        // }
-        // flog_assert(corners.size() == 2, "every side needs to be connected to
-        // 2 corners");
       }
-      else if constexpr(aux_kind == entity_kind<D>::corners) {
-        auto face_view = flecsi::util::transform_view(
-          a2a.at(entity_kind<D>::faces)[ag2l.at(agid)],
-          [&](util::gid g) { return face_pcd.g2l()(util::get_id(g)); });
+      else if constexpr(IS == P<D>::corners) {
+        auto face_view =
+          flecsi::util::transform_view(a2a.at(P<D>::faces)[ag2l.at(agid)],
+            [&](util::gid g) { return face_pcd.g2l()(util::get_id(g)); });
         vertices.emplace_back(view[0]);
         for(auto f : face_view) {
           faces.emplace_back(f);
@@ -2066,14 +1895,10 @@ convert_connectivity(
       }
       crs_vert.add_row(vertices);
       crs_faces.add_row(faces);
-      // if constexpr(aux_kind != entity_kind<D>::corners)
-      //   crs_corners.add_row(corners);
-    }
-  }
-}
+    } // for
+  } // for
+} // convert_connectivity
 
-/// \}
-} // namespace flsp::topo::unstructured::clr
-/// \endcond
+} // namespace flsp::unstructured::clr
 
 #endif // FLSP_TOPO_UNSTRUCTURED_CLR_COLORING_UTILS_HH

@@ -1,8 +1,3 @@
-/*
-  Copyright (c) 2022, Triad National Security, LLC.
-  All rights reserved.
- */
-
 #ifndef FLSP_UNSTRUCTURED_MODELS_HH
 #define FLSP_UNSTRUCTURED_MODELS_HH
 
@@ -12,81 +7,14 @@
 
 namespace flsp::unstructured::io {
 
-template<std::size_t D>
-struct config;
-
-// 1D
-template<>
-struct config<1> {
-  static constexpr std::size_t dimension() {
-    return 1;
-  }
-  enum index_space {
-    vertices,
-    edges = vertices,
-    faces = edges,
-    cells,
-    sides = cells,
-    corners
-  };
-};
-
-// 2D
-template<>
-struct config<2> {
-  static constexpr std::size_t dimension() {
-    return 2;
-  }
-  enum index_space { vertices, edges, faces = edges, cells, sides, corners };
-};
-
-// 3D
-template<>
-struct config<3> {
-  static constexpr std::size_t dimension() {
-    return 3;
-  }
-  enum index_space { vertices, edges, faces, cells, sides, corners };
-};
-
-template<std::size_t D>
-using entity_kind = typename config<D>::index_space;
-
-template<std::size_t D>
-constexpr auto interface_kind();
-
-template<>
-constexpr auto
-interface_kind<1>() {
-  return entity_kind<1>::vertices;
-}
-
-template<>
-constexpr auto
-interface_kind<2>() {
-  return entity_kind<2>::edges;
-}
-
-template<>
-constexpr auto
-interface_kind<3>() {
-  return entity_kind<3>::faces;
-}
-
-template<std::size_t D, entity_kind<D> K>
-struct model {};
-
-// Corner creation is defined with 3D kinds (same for all dimensions).
-
-template<std::size_t D, entity_kind<D> K>
+template<template<std::size_t> typename P, std::size_t D, P<D>::index_space IS>
 auto
-create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
-  util::crs const & c2v,
-  std::map<entity_kind<D>, util::crs> const &,
-  const std::optional<util::crs> & i2d = std::nullopt,
-  const std::optional<std::map<util::gid, util::id>> & ig2l = std::nullopt)
-  -> std::enable_if_t<D == 1 && K == entity_kind<D>::vertices,
-    std::pair<int, int>> {
+create_cell_entities(std::tuple<util::gid, util::id, util::id> const &,
+  util::crs const &,
+  std::map<typename P<D>::index_space, util::crs> const &,
+  const std::optional<util::crs> &,
+  const std::optional<std::map<util::gid, util::id>> &)
+  -> std::enable_if_t<D == 1 && IS == P<D>::vertices, std::pair<int, int>> {
   return std::make_pair(0, 0);
 } // create_cell_entities
 
@@ -114,19 +42,19 @@ struct quad4 {
 // clang-format on
 
 // 2D Edges.
-template<std::size_t D, entity_kind<D> K>
+template<template<std::size_t> typename P, std::size_t D, P<D>::index_space IS>
 auto
 create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
   util::crs const & c2v,
-  std::map<entity_kind<D>, util::crs> const &,
-  const std::optional<util::crs> & i2d = std::nullopt,
-  const std::optional<std::map<util::gid, util::id>> & ig2l = std::nullopt)
-  -> std::enable_if_t<D == 2 && K == entity_kind<D>::edges,
-    std::pair<util::crs, std::map<entity_kind<D>, util::crs>>> {
+  std::map<typename P<D>::index_space, util::crs> const &,
+  const std::optional<util::crs> &,
+  const std::optional<std::map<util::gid, util::id>> &)
+  -> std::enable_if_t<D == 2 && IS == P<D>::edges,
+    std::pair<util::crs, std::map<typename P<D>::index_space, util::crs>>> {
   auto [gid, id, cfaid] = cid;
   auto const & vertices = c2v[id];
   util::crs entities;
-  std::map<entity_kind<D>, util::crs> a2a;
+  std::map<typename P<D>::index_space, util::crs> a2a;
 
   switch(vertices.size()) {
     case 3:
@@ -149,26 +77,25 @@ create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
 } // create_cell_entities
 
 // 2D Sides.
-template<std::size_t D, entity_kind<D> K>
+template<template<std::size_t> typename P, std::size_t D, P<D>::index_space IS>
 auto
 create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
   util::crs const & c2v,
-  std::map<entity_kind<D>, util::crs> const & aux,
-  const std::optional<util::crs> & i2d = std::nullopt,
-  const std::optional<std::map<util::gid, util::id>> & ig2l = std::nullopt)
-  -> std::enable_if_t<D == 2 && K == entity_kind<D>::sides,
-    std::pair<util::crs, std::map<entity_kind<D>, util::crs>>> {
+  std::map<typename P<D>::index_space, util::crs> const & aux,
+  const std::optional<util::crs> &,
+  const std::optional<std::map<util::gid, util::id>> &)
+  -> std::enable_if_t<D == 2 && IS == P<D>::sides,
+    std::pair<util::crs, std::map<typename P<D>::index_space, util::crs>>> {
   auto [gid, id, cfaid] = cid;
   auto const & vertices = c2v[id];
   util::crs entities;
-  std::map<entity_kind<D>, util::crs> a2a;
+  std::map<typename P<D>::index_space, util::crs> a2a;
 
-  auto const & corners =
-    aux.count(entity_kind<D>::corners)
-      ? std::make_optional(aux.at(entity_kind<D>::corners)[cfaid])
-      : std::nullopt;
+  auto const & corners = aux.count(P<D>::corners)
+                           ? std::make_optional(aux.at(P<D>::corners)[cfaid])
+                           : std::nullopt;
 
-  auto const & interfaces = aux.at(interface_kind<D>())[cfaid];
+  auto const & interfaces = aux.at(P<D>::interfaces)[cfaid];
 
   switch(vertices.size()) {
     case 3:
@@ -177,10 +104,10 @@ create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
           {vertices[tri3::edges[e][0]], vertices[tri3::edges[e][1]], gid});
 
         if(corners.has_value()) {
-          a2a[entity_kind<D>::corners].add_row(
+          a2a[P<D>::corners].add_row(
             {(*corners)[tri3::edges[e][0]], (*corners)[tri3::edges[e][1]]});
         } // if
-        a2a[interface_kind<D>()].add_row({interfaces[e]});
+        a2a[P<D>::interfaces].add_row({interfaces[e]});
       } // for
       break;
     case 4:
@@ -189,10 +116,10 @@ create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
           {vertices[quad4::edges[e][0]], vertices[quad4::edges[e][1]], gid});
 
         if(corners.has_value()) {
-          a2a[entity_kind<D>::corners].add_row(
+          a2a[P<D>::corners].add_row(
             {(*corners)[quad4::edges[e][0]], (*corners)[quad4::edges[e][1]]});
         } // if
-        a2a[interface_kind<D>()].add_row({interfaces[e]});
+        a2a[P<D>::interfaces].add_row({interfaces[e]});
       } // for
       break;
     default:
@@ -305,19 +232,19 @@ struct hex8 {
 // clang-format on
 
 // 3D Edges.
-template<std::size_t D, entity_kind<D> K>
+template<template<std::size_t> typename P, std::size_t D, P<D>::index_space IS>
 auto
 create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
   util::crs const & c2v,
-  std::map<entity_kind<D>, util::crs> const &,
-  const std::optional<util::crs> & i2d = std::nullopt,
-  const std::optional<std::map<util::gid, util::id>> & ig2l = std::nullopt)
-  -> std::enable_if_t<D == 3 && K == entity_kind<D>::edges,
-    std::pair<util::crs, std::map<entity_kind<D>, util::crs>>> {
+  std::map<typename P<D>::index_space, util::crs> const &,
+  const std::optional<util::crs> &,
+  const std::optional<std::map<util::gid, util::id>> &)
+  -> std::enable_if_t<D == 3 && IS == P<D>::edges,
+    std::pair<util::crs, std::map<typename P<D>::index_space, util::crs>>> {
   auto [gid, id, cfaid] = cid;
   auto const & vertices = c2v[id];
   util::crs entities;
-  std::map<entity_kind<D>, util::crs> a2a;
+  std::map<typename P<D>::index_space, util::crs> a2a;
 
   switch(vertices.size()) {
     case 4 /* tet4 */:
@@ -340,19 +267,19 @@ create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
 } // create_cell_entities
 
 // 3D Faces.
-template<std::size_t D, entity_kind<D> K>
+template<template<std::size_t> typename P, std::size_t D, P<D>::index_space IS>
 auto
 create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
   util::crs const & c2v,
-  std::map<entity_kind<D>, util::crs> const &,
-  const std::optional<util::crs> & i2d = std::nullopt,
-  const std::optional<std::map<util::gid, util::id>> & ig2l = std::nullopt)
-  -> std::enable_if_t<D == 3 && K == entity_kind<D>::faces,
-    std::pair<util::crs, std::map<entity_kind<D>, util::crs>>> {
+  std::map<typename P<D>::index_space, util::crs> const &,
+  const std::optional<util::crs> &,
+  const std::optional<std::map<util::gid, util::id>> &)
+  -> std::enable_if_t<D == 3 && IS == P<D>::faces,
+    std::pair<util::crs, std::map<typename P<D>::index_space, util::crs>>> {
   auto [gid, id, cfaid] = cid;
   auto const & vertices = c2v[id];
   util::crs entities;
-  std::map<entity_kind<D>, util::crs> a2a;
+  std::map<typename P<D>::index_space, util::crs> a2a;
 
   switch(vertices.size()) {
     case 4 /* tet4 */:
@@ -378,28 +305,27 @@ create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
 } // create_cell_entities
 
 // 3D Sides.
-template<std::size_t D, entity_kind<D> K>
+template<template<std::size_t> typename P, std::size_t D, P<D>::index_space IS>
 auto
 create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
   util::crs const & c2v,
-  std::map<entity_kind<D>, util::crs> const & aux,
-  const std::optional<util::crs> & i2d = std::nullopt,
-  const std::optional<std::map<util::gid, util::id>> & ig2l = std::nullopt)
-  -> std::enable_if_t<D == 3 && K == entity_kind<D>::sides,
-    std::pair<util::crs, std::map<entity_kind<D>, util::crs>>> {
+  std::map<typename P<D>::index_space, util::crs> const & aux,
+  const std::optional<util::crs> &,
+  const std::optional<std::map<util::gid, util::id>> &)
+  -> std::enable_if_t<D == 3 && IS == P<D>::sides,
+    std::pair<util::crs, std::map<typename P<D>::index_space, util::crs>>> {
   auto [gid, id, cfaid] = cid;
   auto const & vertices = c2v[id];
   util::crs entities;
-  std::map<entity_kind<D>, util::crs> a2a;
+  std::map<typename P<D>::index_space, util::crs> a2a;
 
-  flog_assert(aux.count(entity_kind<D>::faces), "faces are required");
+  flog_assert(aux.count(P<D>::faces), "faces are required");
 
-  auto const & faces = aux.at(entity_kind<D>::faces)[cfaid];
+  auto const & faces = aux.at(P<D>::faces)[cfaid];
 
-  auto const & corners =
-    aux.count(entity_kind<D>::corners)
-      ? std::make_optional(aux.at(entity_kind<D>::corners)[cfaid])
-      : std::nullopt;
+  auto const & corners = aux.count(P<D>::corners)
+                           ? std::make_optional(aux.at(P<D>::corners)[cfaid])
+                           : std::nullopt;
 
   // FIXME: Need to capture correct orientation information, i.e.,
   // invert vertices if ones complement set for face.
@@ -411,10 +337,10 @@ create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
           {vertices[tet4::sides[s][0]], vertices[tet4::sides[s][1]], fid, gid});
 
         if(corners.has_value()) {
-          a2a[entity_kind<D>::corners].add_row(
+          a2a[P<D>::corners].add_row(
             {(*corners)[tet4::sides[s][0]], (*corners)[tet4::sides[s][1]]});
         } // if
-        a2a[interface_kind<D>()].add_row({fid});
+        a2a[P<D>::interfaces].add_row({fid});
       } // for
       break;
     case 8 /* hex8 */:
@@ -423,10 +349,10 @@ create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
         entities.add_row(
           {vertices[hex8::sides[s][0]], vertices[hex8::sides[s][1]], fid, gid});
         if(corners.has_value()) {
-          a2a[entity_kind<D>::corners].add_row(
+          a2a[P<D>::corners].add_row(
             {(*corners)[hex8::sides[s][0]], (*corners)[hex8::sides[s][1]]});
         } // if
-        a2a[interface_kind<D>()].add_row({fid});
+        a2a[P<D>::interfaces].add_row({fid});
       } // for
       break;
     default:
@@ -437,22 +363,21 @@ create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
 } // create_cell_entities
 
 // 1D, 2D, and 3D Corners.
-template<std::size_t D, entity_kind<D> K>
+template<template<std::size_t> typename P, std::size_t D, P<D>::index_space IS>
 auto
 create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
   util::crs const & c2v,
-  std::map<entity_kind<D>, util::crs> const & aux,
+  std::map<typename P<D>::index_space, util::crs> const & aux,
   const std::optional<util::crs> & i2d = std::nullopt,
   const std::optional<std::map<util::gid, util::id>> & ig2l = std::nullopt)
-  -> std::enable_if_t<(D == 1 || D == 2 || D == 3) &&
-                        K == entity_kind<D>::corners,
-    std::pair<util::crs, std::map<entity_kind<D>, util::crs>>> {
+  -> std::enable_if_t<(D == 1 || D == 2 || D == 3) && IS == P<D>::corners,
+    std::pair<util::crs, std::map<typename P<D>::index_space, util::crs>>> {
   auto [gid, id, cfaid] = cid;
   auto const & vertices = c2v[id];
   util::crs entities;
-  std::map<entity_kind<D>, util::crs> a2a;
+  std::map<typename P<D>::index_space, util::crs> a2a;
 
-  auto const & interfaces = aux.at(interface_kind<D>())[cfaid];
+  auto const & interfaces = aux.at(P<D>::interfaces)[cfaid];
 
   for(std::size_t v{0}; v < vertices.size(); ++v) {
     std::vector<util::gid> faces;
@@ -464,7 +389,7 @@ create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
         faces.emplace_back(f);
       } // if
     } // for
-    a2a[interface_kind<D>()].add_row(faces);
+    a2a[P<D>::interfaces].add_row(faces);
   } // for
 
   return std::make_pair(std::move(entities), std::move(a2a));
