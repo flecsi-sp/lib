@@ -457,7 +457,7 @@ protected:
   virtual util::gid num_entities(EK<D>::index_space is) const override {
     flog_assert(
       is == EK<D>::cells || is == EK<D>::vertices || is == EK<D>::faces,
-      "invalid entity kind " << k);
+      "invalid entity kind " << is);
 
     switch(is) {
       case EK<D>::cells:
