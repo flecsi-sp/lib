@@ -264,7 +264,7 @@ get_block_type(const block_stats_t<U> & stats) {
     return block_t::unknown;
 }
 
-int
+inline int
 open(const std::string & name, std::ios_base::openmode mode) {
 #ifdef DEBUG
   ex_opts(EX_ABORT | EX_VERBOSE);
