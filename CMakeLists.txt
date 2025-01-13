@@ -16,7 +16,10 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 #------------------------------------------------------------------------------#
 
 cmake_policy(SET CMP0144 NEW) # ``PACKAGE_NAME''_ROOT
-cmake_policy(SET CMP0167 NEW) # FindBoost
+if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.30.0")
+  # squelch warning in newer CMake versions
+  cmake_policy(SET CMP0167 NEW) # FindBoost
+endif()
 
 #------------------------------------------------------------------------------#
 # Project.
