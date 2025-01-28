@@ -56,6 +56,9 @@ mesh_initialization() {
   };
 } // mesh_initialization
 
+flecsi::util::unit::driver<mesh_initialization> driver;
+
+// I/O support.
 const inline bool register_simple_1d =
   io::io_factory<policy, 1>::instance().register_type("msh",
     io::simple_handler<policy, 1>);
@@ -82,5 +85,3 @@ const inline bool register_exodusii_2d =
 const inline bool register_exodusii_3d =
   io::io_factory<policy, 3>::instance().register_type("exo",
     io::exodus_handler<policy, 3>);
-
-flecsi::util::unit::driver<mesh_initialization> driver;
