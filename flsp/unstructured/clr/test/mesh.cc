@@ -42,7 +42,7 @@ mesh_initialization_test() {
     typename mesh<D>::user_data user_data;
     typename mesh<D>::slot m;
     m.allocate(typename mesh<D>::mpi_coloring(
-                 4, filename, matfiles, bndfiles, user_data),
+                 flecsi::processes(), filename, matfiles, bndfiles, user_data),
       user_data);
   }; // UNIT
 } // mesh_initialization_test
