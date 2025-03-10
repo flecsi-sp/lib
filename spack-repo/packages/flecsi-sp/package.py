@@ -16,16 +16,16 @@ class FlecsiSp(CMakePackage):
     variant("x3d", default=True,
             description="Build with support for the X3D file format"
     )
-    variant("doc", default=False, description="Enable documentation")
+    variant("documentation", default=False, description="Enable documentation")
 
     depends_on("flecsi@2.3:")
 
     depends_on("exodusii", when="+exodusii")
 
-    depends_on("py-sphinx", when="+doc")
-    depends_on("py-sphinx-rtd-theme", when="+doc")
-    depends_on("doxygen", when="+doc")
-    depends_on("graphviz", when="+doc")
+    depends_on("py-sphinx", when="+documentation", type="build")
+    depends_on("py-sphinx-rtd-theme", when="+documentation", type="build")
+    depends_on("doxygen", when="+documentation", type="build")
+    depends_on("graphviz", when="+documentation", type="build")
 
     def cmake_args(self):
         spec = self.spec
