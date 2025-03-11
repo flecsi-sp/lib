@@ -235,7 +235,7 @@ create_naive(util::equal_map const & cem,
   } // for
 
   return std::make_pair(std::move(c2c), std::move(naive));
-} // create_graph
+} // create_naive
 
 /*!
   Return owner information for the given @em request.

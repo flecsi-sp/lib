@@ -7,6 +7,19 @@
 
 namespace flsp::unstructured::io {
 
+/*!
+  The shape type can be used to capture individual entity types, e.g., for
+  storage in a list. These are intended to be used in conjuction with a
+  dimension to avoid enity type collisions.
+ */
+enum shape {
+  seg2 = 2,
+  tri3 = 3,
+  quad4 = 4,
+  tet4 = 4,
+  hex8 = 8
+};
+
 template<template<std::size_t> typename P, std::size_t D, P<D>::index_space IS>
 auto
 create_cell_entities(std::tuple<util::gid, util::id, util::id> const &,
@@ -57,13 +70,13 @@ create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
   std::map<typename P<D>::index_space, util::crs> a2a;
 
   switch(vertices.size()) {
-    case 3:
+    case shape::tri3:
       for(int e{0}; e < tri3::num_edges; ++e) {
         entities.add_row(
           {vertices[tri3::edges[e][0]], vertices[tri3::edges[e][1]]});
       } // for
       break;
-    case 4:
+    case shape::quad4:
       for(int e{0}; e < quad4::num_edges; ++e) {
         entities.add_row(
           {vertices[quad4::edges[e][0]], vertices[quad4::edges[e][1]]});
@@ -98,7 +111,7 @@ create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
   auto const & interfaces = aux.at(P<D>::interfaces)[cfaid];
 
   switch(vertices.size()) {
-    case 3:
+    case shape::tri3:
       for(int e{0}; e < tri3::num_edges; ++e) {
         entities.add_row(
           {vertices[tri3::edges[e][0]], vertices[tri3::edges[e][1]], gid});
@@ -110,7 +123,7 @@ create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
         a2a[P<D>::interfaces].add_row({interfaces[e]});
       } // for
       break;
-    case 4:
+    case shape::quad4:
       for(int e{0}; e < quad4::num_edges; ++e) {
         entities.add_row(
           {vertices[quad4::edges[e][0]], vertices[quad4::edges[e][1]], gid});
@@ -247,13 +260,13 @@ create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
   std::map<typename P<D>::index_space, util::crs> a2a;
 
   switch(vertices.size()) {
-    case 4 /* tet4 */:
+    case shape::tet4:
       for(int e{0}; e < tet4::num_edges; ++e) {
         entities.add_row(
           {vertices[tet4::edges[e][0]], vertices[tet4::edges[e][1]]});
       } // for
       break;
-    case 8 /* hex8 */:
+    case shape::hex8:
       for(int e{0}; e < hex8::num_edges; ++e) {
         entities.add_row(
           {vertices[hex8::edges[e][0]], vertices[hex8::edges[e][1]]});
@@ -282,14 +295,14 @@ create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
   std::map<typename P<D>::index_space, util::crs> a2a;
 
   switch(vertices.size()) {
-    case 4 /* tet4 */:
+    case shape::tet4:
       for(int e{0}; e < tet4::num_faces; ++e) {
         entities.add_row({vertices[tet4::faces[e][0]],
           vertices[tet4::faces[e][1]],
           vertices[tet4::faces[e][2]]});
       } // for
       break;
-    case 8 /* hex8 */:
+    case shape::hex8:
       for(int e{0}; e < hex8::num_faces; ++e) {
         entities.add_row({vertices[hex8::faces[e][0]],
           vertices[hex8::faces[e][1]],
@@ -330,7 +343,7 @@ create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
   // FIXME: Need to capture correct orientation information, i.e.,
   // invert vertices if ones complement set for face.
   switch(vertices.size()) {
-    case 4 /* tet4 */:
+    case shape::tet4:
       for(int s{0}; s < tet4::num_sides; ++s) {
         auto const fid = util::get_id(faces[tet4::sides[s][2]]);
         entities.add_row(
@@ -343,7 +356,7 @@ create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
         a2a[P<D>::interfaces].add_row({fid});
       } // for
       break;
-    case 8 /* hex8 */:
+    case shape::hex8:
       for(int s{0}; s < hex8::num_sides; ++s) {
         auto const fid = util::get_id(faces[hex8::sides[s][2]]);
         entities.add_row(
