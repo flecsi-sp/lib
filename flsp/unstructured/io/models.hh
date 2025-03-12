@@ -13,6 +13,7 @@ namespace flsp::unstructured::io {
   dimension to avoid enity type collisions.
  */
 enum shape {
+  pnt1 = 1,
   seg2 = 2,
   tri3 = 3,
   quad4 = 4,
