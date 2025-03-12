@@ -4,11 +4,23 @@ class FlecsiSp(CMakePackage):
     """The FleCSI-SP library provides utilities for creating FleCSI specializations
     """
 
+    ############################################################################
+    # Info
+    ############################################################################
+
     homepage = "http://flecsi-sp.org/"
     git = "ssh://git@re-git.lanl.gov:10022/flecsi-sp/lib.git"
     maintainers("bergen")
 
+    ############################################################################
+    # Versions
+    ############################################################################
+
     version("develop", branch="develop")
+
+    ############################################################################
+    # Variants
+    ############################################################################
 
     variant("exodusii", default=True,
             description="Build with support for the ExodusII file format"
@@ -17,6 +29,10 @@ class FlecsiSp(CMakePackage):
             description="Build with support for the X3D file format"
     )
     variant("documentation", default=False, description="Enable documentation")
+
+    ############################################################################
+    # Dependnencies
+    ############################################################################
 
     depends_on("flecsi@2.3:")
 
@@ -27,13 +43,17 @@ class FlecsiSp(CMakePackage):
     depends_on("doxygen", when="+documentation", type="build")
     depends_on("graphviz", when="+documentation", type="build")
 
+    ############################################################################
+    # Build
+    ############################################################################
+
     def cmake_args(self):
         spec = self.spec
 
         options = [
             self.define_from_variant("ENABLE_EXODUSII", "exodusii"),
             self.define_from_variant("ENABLE_X3D", "x3d"),
-            self.define_from_variant("ENABLE_DOCUMENTATION", "doc"),
+            self.define_from_variant("ENABLE_DOCUMENTATION", "documentation"),
             self.define("ENABLE_UNIT_TESTS", self.run_tests)
         ]
 
