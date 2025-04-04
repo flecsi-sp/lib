@@ -7,6 +7,7 @@
 #include <flecsi/util/mpi.hh>
 
 #include <cmath>
+#include <type_traits>
 
 /// @cond core
 namespace flsp::unstructured {
