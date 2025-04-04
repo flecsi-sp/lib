@@ -1816,7 +1816,10 @@ convert_connectivity(
 
     for(auto egid : primary_pcd.all) {
       crs_cell.add_row(flecsi::util::transform_view(c2a[cfam2p.at(egid)],
-        [&](util::gid g) { return aux_pcd.g2l()(util::get_id(g)); }));
+        [&](util::gid g) {
+          const util::id l = aux_pcd.g2l()(util::get_id(g));
+          return (IS == P<D>::interfaces && util::sign_bit(g)) ? ~l : l;
+        }));
     } // for
 
     for(auto agid : aux_pcd.all) {
