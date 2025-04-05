@@ -1117,9 +1117,11 @@ create_auxiliaries(std::vector<util::gid> const & cells,
       ++i;
     } // for
 
+    #if 0
     std::sort(these.begin(), these.end(), [](util::gid a, util::gid b) {
       return util::get_id(a) < util::get_id(b);
     });
+    #endif
     c2a.add_row(these);
   } // for
 
