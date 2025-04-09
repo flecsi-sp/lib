@@ -21,6 +21,15 @@ enum shape {
   hex8 = 8
 };
 
+// clang-format off
+struct seg2 {
+  static constexpr double ref[2][1] = {
+    {0.0},
+    {1.0}
+  };
+}; // struct seg2
+// clang-format on
+
 template<template<std::size_t> typename P, std::size_t D, P<D>::index_space IS>
 auto
 create_cell_entities(std::tuple<util::gid, util::id, util::id> const &,
@@ -34,6 +43,12 @@ create_cell_entities(std::tuple<util::gid, util::id, util::id> const &,
 
 // clang-format off
 struct tri3 {
+  static constexpr double ref[3][2] = {
+    {0.0, 0.0},
+    {1.0, 0.0},
+    {0.0, 1.0}
+  };
+
   static constexpr int num_edges{3};
   static constexpr std::uint32_t edges[num_edges][2] = {
     {0, 1}, /* v0, v1 */
@@ -44,6 +59,13 @@ struct tri3 {
 }; // struct tri3
 
 struct quad4 {
+  static constexpr double ref[4][2] = {
+    {0.0, 0.0},
+    {1.0, 0.0},
+    {1.0, 1.0},
+    {0.0, 1.0}
+  };
+
   static constexpr int num_edges{4};
   static constexpr std::uint32_t edges[num_edges][2] = {
     {0, 1}, /* v0, v1 */
@@ -145,6 +167,13 @@ create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
 
 // clang-format off
 struct tet4 {
+  static constexpr double ref[4][3] {
+    {0.0, 0.0, 0.0},
+    {1.0, 0.0, 0.0},
+    {0.0, 1.0, 0.0},
+    {0.0, 0.0, 1.0}
+  };
+
   static constexpr int num_edges{6};
   static constexpr std::uint32_t edges[num_edges][2] = {
     {0, 1}, /* v0, v1 */
@@ -184,6 +213,17 @@ struct tet4 {
 }; // struct tet4
 
 struct hex8 {
+  static constexpr double ref[8][3] {
+    {0.0, 0.0, 0.0},
+    {1.0, 0.0, 0.0},
+    {1.0, 1.0, 0.0},
+    {0.0, 1.0, 0.0},
+    {0.0, 0.0, 1.0},
+    {1.0, 0.0, 1.0},
+    {1.0, 1.0, 1.0},
+    {0.0, 1.0, 1.0}
+  };
+
   static constexpr int num_edges{12};
   static constexpr std::uint32_t edges[num_edges][2] = {
     {0, 1}, /* v0, v1 */
