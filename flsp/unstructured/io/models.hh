@@ -12,7 +12,7 @@ namespace flsp::unstructured::io {
   storage in a list. These are intended to be used in conjuction with a
   dimension to avoid enity type collisions.
  */
-enum shape {
+enum struct shape : std::size_t {
   pnt1 = 1,
   seg2 = 2,
   tri3 = 3,
@@ -92,7 +92,7 @@ create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
   util::crs entities;
   std::map<typename P<D>::index_space, util::crs> a2a;
 
-  switch(vertices.size()) {
+  switch(shape{vertices.size()}) {
     case shape::tri3:
       for(int e{0}; e < tri3::num_edges; ++e) {
         entities.add_row(
@@ -133,7 +133,7 @@ create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
 
   auto const & interfaces = aux.at(P<D>::interfaces)[cfaid];
 
-  switch(vertices.size()) {
+  switch(shape{vertices.size()}) {
     case shape::tri3:
       for(int e{0}; e < tri3::num_edges; ++e) {
         entities.add_row(
@@ -300,7 +300,7 @@ create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
   util::crs entities;
   std::map<typename P<D>::index_space, util::crs> a2a;
 
-  switch(vertices.size()) {
+  switch(shape{vertices.size()}) {
     case shape::tet4:
       for(int e{0}; e < tet4::num_edges; ++e) {
         entities.add_row(
@@ -335,7 +335,7 @@ create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
   util::crs entities;
   std::map<typename P<D>::index_space, util::crs> a2a;
 
-  switch(vertices.size()) {
+  switch(shape{vertices.size()}) {
     case shape::tet4:
       for(int e{0}; e < tet4::num_faces; ++e) {
         entities.add_row({vertices[tet4::faces[e][0]],
@@ -383,7 +383,7 @@ create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
 
   // FIXME: Need to capture correct orientation information, i.e.,
   // invert vertices if ones complement set for face.
-  switch(vertices.size()) {
+  switch(shape{vertices.size()}) {
     case shape::tet4:
       for(int s{0}; s < tet4::num_sides; ++s) {
         auto const fid = util::get_id(faces[tet4::sides[s][2]]);
