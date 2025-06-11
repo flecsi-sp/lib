@@ -28,6 +28,8 @@ class FlecsiSp(CMakePackage):
     variant("x3d", default=True,
             description="Build with support for the X3D file format"
     )
+    variant("format", default=False,
+        description="add dependencies for format check")
     variant("documentation", default=False, description="Enable documentation")
 
     ############################################################################
@@ -42,6 +44,7 @@ class FlecsiSp(CMakePackage):
     depends_on("py-sphinx-rtd-theme", when="+documentation", type="build")
     depends_on("doxygen", when="+documentation", type="build")
     depends_on("graphviz", when="+documentation", type="build")
+    depends_on("llvm@18", when="+format", type="build")
 
     ############################################################################
     # Build
