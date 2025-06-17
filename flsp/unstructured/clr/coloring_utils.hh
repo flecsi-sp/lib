@@ -1117,11 +1117,11 @@ create_auxiliaries(std::vector<util::gid> const & cells,
       ++i;
     } // for
 
-    #if 0
+#if 0
     std::sort(these.begin(), these.end(), [](util::gid a, util::gid b) {
       return util::get_id(a) < util::get_id(b);
     });
-    #endif
+#endif
     c2a.add_row(these);
   } // for
 
@@ -1817,8 +1817,8 @@ convert_connectivity(
     auto & crs_faces = connectivity[IS][lco][P<D>::faces];
 
     for(auto egid : primary_pcd.all) {
-      crs_cell.add_row(flecsi::util::transform_view(c2a[cfam2p.at(egid)],
-        [&](util::gid g) {
+      crs_cell.add_row(
+        flecsi::util::transform_view(c2a[cfam2p.at(egid)], [&](util::gid g) {
           const util::id l = aux_pcd.g2l()(util::get_id(g));
           return (IS == P<D>::interfaces && util::sign_bit(g)) ? ~l : l;
         }));
