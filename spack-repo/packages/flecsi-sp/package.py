@@ -1,5 +1,6 @@
 from spack.package import *
 
+
 class FlecsiSp(CMakePackage):
     """The FleCSI-SP library provides utilities for creating FleCSI specializations
     """
@@ -24,12 +25,12 @@ class FlecsiSp(CMakePackage):
 
     variant("exodusii", default=True,
             description="Build with support for the ExodusII file format"
-    )
+            )
     variant("x3d", default=True,
             description="Build with support for the X3D file format"
-    )
+            )
     variant("format", default=False,
-        description="add dependencies for format check")
+            description="add dependencies for format check")
     variant("documentation", default=False, description="Enable documentation")
 
     ############################################################################

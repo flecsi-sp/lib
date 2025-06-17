@@ -58,7 +58,7 @@ using iota_view = flecsi::util::iota_view<std::size_t>;
 template<template<std::size_t> typename P, std::size_t D>
 struct definition_base {
 
-  virtual ~definition_base(){};
+  virtual ~definition_base() {};
 
   /*!
     Return the global number of entities of the given kind.
