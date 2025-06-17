@@ -2,7 +2,8 @@
 
 # FleCSI-SP Utilities Library
 
-FIXME
+The FleCSI Specializations library _lib-sp_ provides useful interfaces
+for I/O, mesh entity models, and mesh coloring.
 
 # License
 
