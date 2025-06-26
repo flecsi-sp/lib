@@ -46,6 +46,7 @@ class FlecsiSp(CMakePackage):
     depends_on("doxygen", when="+documentation", type="build")
     depends_on("graphviz", when="+documentation", type="build")
     depends_on("llvm@18", when="+format", type="build")
+    depends_on("parmetis@4.0.3:")
 
     ############################################################################
     # Build

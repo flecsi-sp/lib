@@ -136,6 +136,13 @@ if(ENABLE_DOCUMENTATION)
 endif()
 
 #------------------------------------------------------------------------------#
+# Dependencies
+#------------------------------------------------------------------------------#
+
+set(PARMETIS_TEST_RUNS TRUE)
+find_package(ParMETIS REQUIRED)
+
+#------------------------------------------------------------------------------#
 # FleCSI-SP Library
 #------------------------------------------------------------------------------#
 
@@ -167,6 +174,7 @@ if(ENABLE_LIBRARY)
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
   )
   target_link_libraries(FleCSI-SP INTERFACE FleCSI::FleCSI)
+  target_link_libraries(FleCSI-SP INTERFACE ParMetis::ParMetis)
 
   #----------------------------------------------------------------------------#
   # Add options.

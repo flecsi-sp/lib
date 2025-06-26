@@ -9,6 +9,8 @@ flsp_headers(
   io/x3d_definition.hh
   util/common.hh
   util/factory.hh
+  util/parmetis.hh
+  util/coloring_options.hh
 )
 
 set(COLORING_INPUTS
