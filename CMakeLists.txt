@@ -237,6 +237,13 @@ if(ENABLE_LIBRARY)
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/FleCSI-SP
   )
 
+  if(ENABLE_EXODUSII)
+    install(FILES ${PROJECT_SOURCE_DIR}/cmake/FindEXODUSII.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake)
+  endif()
+
+  install(FILES ${PROJECT_SOURCE_DIR}/cmake/FindParMETIS.cmake ${PROJECT_SOURCE_DIR}/cmake/FindMETIS.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake)
+  install(FILES ${PROJECT_SOURCE_DIR}/cmake/FindZoltan.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake)
+
   #----------------------------------------------------------------------------#
   # Unit Tests
   #----------------------------------------------------------------------------#

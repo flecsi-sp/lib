@@ -22,6 +22,14 @@ if(@ENABLE_EXODUSII@)
   find_package(EXODUSII REQUIRED)
 endif()
 
+set(preserve_PMT ${PARMETIS_TEST_RUNS})
+set(PARMETIS_TEST_RUNS TRUE)
+find_package(ParMETIS @PARMETIS_VERSION@ REQUIRED)
+if(@FleCSI_SP_ENABLE_ZOLTAN@)
+  find_package(Zoltan REQUIRED)
+endif()
+set(PARMETIS_TEST_RUNS ${preserve_PMT})
+
 #------------------------------------------------------------------------------#
 # FleCSI-SP library dependencies (contains definitions for IMPORTED targets)
 #------------------------------------------------------------------------------#
