@@ -10,6 +10,7 @@
 #include <flecsi/flog.hh>
 #include <flecsi/topo/unstructured/interface.hh>
 #include "flsp/unstructured/util/parmetis.hh"
+#include "flsp/unstructured/util/zoltan.hh"
 #include "unstructured/util/coloring_options.hh"
 
 #include <cstddef>

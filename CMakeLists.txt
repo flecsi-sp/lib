@@ -156,6 +156,7 @@ if(ENABLE_LIBRARY)
 
   option(ENABLE_EXODUSII "Build with ExodusII Support" ON)
   option(ENABLE_X3D "Build with X3D Support" ON)
+  option(ENABLE_ZOLTAN "Enable domain decomposition with Zoltan" OFF)
 
   include(GNUInstallDirs)
   include(FleCSI-SP/exodusii)
@@ -175,6 +176,10 @@ if(ENABLE_LIBRARY)
   )
   target_link_libraries(FleCSI-SP INTERFACE FleCSI::FleCSI)
   target_link_libraries(FleCSI-SP INTERFACE ParMetis::ParMetis)
+  if(ENABLE_ZOLTAN)
+    find_package(Zoltan REQUIRED)
+    target_link_libraries(FleCSI-SP INTERFACE Zoltan::Zoltan)
+  endif()
 
   #----------------------------------------------------------------------------#
   # Add options.
