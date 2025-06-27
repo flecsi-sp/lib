@@ -19,7 +19,7 @@ inline std::ostream &
 operator<<(std::ostream & out, const framework_t & value) {
   return out << [value]() {
 #define PROCESS_VAL(p)                                                         \
-  case(framework_t::p):                                                          \
+  case(framework_t::p):                                                        \
     return #p;
     switch(value) {
       PROCESS_VAL(PARMETIS);
@@ -34,7 +34,7 @@ inline std::ostream &
 operator<<(std::ostream & out, const method_t & value) {
   return out << [value]() {
 #define PROCESS_VAL(p)                                                         \
-  case(method_t::p):                                                             \
+  case(method_t::p):                                                           \
     return #p;
     switch(value) {
       PROCESS_VAL(BLOCK);
@@ -52,7 +52,7 @@ inline std::ostream &
 operator<<(std::ostream & out, const graph_method_t & value) {
   return out << [value]() {
 #define PROCESS_VAL(p)                                                         \
-  case(graph_method_t::p):                                                       \
+  case(graph_method_t::p):                                                     \
     return #p;
     switch(value) {
       PROCESS_VAL(PARMETIS);

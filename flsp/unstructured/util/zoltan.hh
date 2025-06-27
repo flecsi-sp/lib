@@ -52,36 +52,38 @@ color(const flecsi::util::offsets & dist,
 
   Zoltan zz(comm);
 
-  int changes, num_gid_entries, num_lid_entries, num_import, num_export, *import_procs, *import_to_part, *export_procs, *export_to_part;
-  ZOLTAN_ID_PTR import_global_ids, import_local_ids, export_global_ids, export_local_ids;
+  int changes, num_gid_entries, num_lid_entries, num_import, num_export,
+    *import_procs, *import_to_part, *export_procs, *export_to_part;
+  ZOLTAN_ID_PTR import_global_ids, import_local_ids, export_global_ids,
+    export_local_ids;
 
   switch(co.method) {
-  case flsp::util::method_t::BLOCK:
-    zz.Set_Param("LB_METHOD", "BLOCK");
-    break;
-  case flsp::util::method_t::RANDOM:
-    zz.Set_Param("LB_METHOD", "RANDOM");
-    break;
-  case flsp::util::method_t::RCB:
-    zz.Set_Param("LB_METHOD", "RCB");
-    break;
-  case flsp::util::method_t::RIB:
-    zz.Set_Param("LB_METHOD", "RIB");
-    break;
-  case flsp::util::method_t::GRAPH:
-    zz.Set_Param("LB_METHOD", "GRAPH");
-    switch(co.graph_method) {
-    case flsp::util::graph_method_t::PARMETIS:
-      zz.Set_Param("GRAPH_PACKAGE", "ParMETIS");
+    case flsp::util::method_t::BLOCK:
+      zz.Set_Param("LB_METHOD", "BLOCK");
       break;
-    case flsp::util::graph_method_t::PHG:
-      zz.Set_Param("GRAPH_PACKAGE", "PHG");
+    case flsp::util::method_t::RANDOM:
+      zz.Set_Param("LB_METHOD", "RANDOM");
       break;
-          case flsp::util::graph_method_t::Scotch:
-      zz.Set_Param("GRAPH_PACKAGE", "Scotch");
+    case flsp::util::method_t::RCB:
+      zz.Set_Param("LB_METHOD", "RCB");
       break;
-    }
-    break;
+    case flsp::util::method_t::RIB:
+      zz.Set_Param("LB_METHOD", "RIB");
+      break;
+    case flsp::util::method_t::GRAPH:
+      zz.Set_Param("LB_METHOD", "GRAPH");
+      switch(co.graph_method) {
+        case flsp::util::graph_method_t::PARMETIS:
+          zz.Set_Param("GRAPH_PACKAGE", "ParMETIS");
+          break;
+        case flsp::util::graph_method_t::PHG:
+          zz.Set_Param("GRAPH_PACKAGE", "PHG");
+          break;
+        case flsp::util::graph_method_t::Scotch:
+          zz.Set_Param("GRAPH_PACKAGE", "Scotch");
+          break;
+      }
+      break;
   }
   zz.Set_Param("DEBUG_LEVEL", std::to_string(co.debug_level).c_str());
   zz.Set_Param("DEBUG_MEMORY", std::to_string(co.debug_memory).c_str());
@@ -194,7 +196,8 @@ color(const flecsi::util::offsets & dist,
 
   return std::move(part);
 #else
-  flog_fatal("trying to use Zoltan domain decomposition but FleCSI-SP is not built with ENABLE_ZOLTAN");
+  flog_fatal("trying to use Zoltan domain decomposition but FleCSI-SP is not "
+             "built with ENABLE_ZOLTAN");
 #endif
 } // color
 

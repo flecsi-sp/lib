@@ -79,7 +79,8 @@ color(const flecsi::util::offsets & dist,
   if(adjncy.empty())
     adjncy.emplace_back();
 
-  auto sub = flecsi::util::mpi::comm::split(comm, part.empty() ? MPI_UNDEFINED : 0);
+  auto sub =
+    flecsi::util::mpi::comm::split(comm, part.empty() ? MPI_UNDEFINED : 0);
 
   if(sub) {
     idx_t parmetis_colors = colors;
