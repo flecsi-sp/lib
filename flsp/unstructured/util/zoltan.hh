@@ -40,7 +40,7 @@ inline std::vector<flecsi::Color>
 color(const flecsi::util::offsets & dist,
   const flecsi::util::crs & graph,
   flecsi::Color colors,
-  const coloring_options & co,
+  const coloring_options & co = flsp::util::coloring_options(),
   MPI_Comm comm = MPI_COMM_WORLD) {
 
 #ifdef FLECSI_SP_ENABLE_ZOLTAN
