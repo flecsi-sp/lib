@@ -6,10 +6,12 @@
 #include "flsp/unstructured/io/types.hh"
 #include "flsp/unstructured/util/common.hh"
 
+#include "flsp/unstructured/util/parmetis.hh"
+#include "flsp/unstructured/util/zoltan.hh"
+#include "unstructured/util/coloring_options.hh"
 #include <flecsi/data.hh>
 #include <flecsi/flog.hh>
 #include <flecsi/topo/unstructured/interface.hh>
-#include <flecsi/util/parmetis.hh>
 
 #include <cstddef>
 
@@ -435,7 +437,8 @@ struct mesh
      *------------------------------------------------------------------------*/
 
     std::vector<Color> cell_raw;
-    cell_raw = flecsi::util::parmetis::color(cem, naive, num_colors);
+    cell_raw = flsp::util::parmetis::color<D>(
+      cem, naive, num_colors, flsp::util::coloring_options());
 
     /*------------------------------------------------------------------------*
       Migrate the cell data to the owning processes.

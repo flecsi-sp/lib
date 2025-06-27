@@ -136,6 +136,13 @@ if(ENABLE_DOCUMENTATION)
 endif()
 
 #------------------------------------------------------------------------------#
+# Dependencies
+#------------------------------------------------------------------------------#
+
+set(PARMETIS_TEST_RUNS TRUE)
+find_package(ParMETIS REQUIRED)
+
+#------------------------------------------------------------------------------#
 # FleCSI-SP Library
 #------------------------------------------------------------------------------#
 
@@ -149,6 +156,7 @@ if(ENABLE_LIBRARY)
 
   option(ENABLE_EXODUSII "Build with ExodusII Support" ON)
   option(ENABLE_X3D "Build with X3D Support" ON)
+  option(ENABLE_ZOLTAN "Enable domain decomposition with Zoltan" OFF)
 
   include(GNUInstallDirs)
   include(FleCSI-SP/exodusii)
@@ -167,6 +175,11 @@ if(ENABLE_LIBRARY)
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
   )
   target_link_libraries(FleCSI-SP INTERFACE FleCSI::FleCSI)
+  target_link_libraries(FleCSI-SP INTERFACE ParMetis::ParMetis)
+  if(ENABLE_ZOLTAN)
+    find_package(Zoltan REQUIRED)
+    target_link_libraries(FleCSI-SP INTERFACE Zoltan::Zoltan)
+  endif()
 
   #----------------------------------------------------------------------------#
   # Add options.
@@ -223,6 +236,13 @@ if(ENABLE_LIBRARY)
     FILES ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/FleCSI-SPConfig.cmake
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/FleCSI-SP
   )
+
+  if(ENABLE_EXODUSII)
+    install(FILES ${PROJECT_SOURCE_DIR}/cmake/FindEXODUSII.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake)
+  endif()
+
+  install(FILES ${PROJECT_SOURCE_DIR}/cmake/FindParMETIS.cmake ${PROJECT_SOURCE_DIR}/cmake/FindMETIS.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake)
+  install(FILES ${PROJECT_SOURCE_DIR}/cmake/FindZoltan.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake)
 
   #----------------------------------------------------------------------------#
   # Unit Tests
@@ -322,6 +342,10 @@ if(NOT ENABLE_SANITY_BUILD)
 
   string(APPEND _summary "\n")
   flecsi_summary_option("ENABLE_UNIT_TESTS" "${ENABLE_UNIT_TESTS}" "")
+  string(APPEND _summary "\n")
+  flecsi_summary_option("ENABLE_X3D" "${ENABLE_X3D}" "")
+  flecsi_summary_option("ENABLE_EXODUSII" "${ENABLE_EXODUSII}" "")
+  flecsi_summary_option("ENABLE_ZOLTAN" "${ENABLE_ZOLTAN}" "")
   string(APPEND _summary "\n")
 endif()
 

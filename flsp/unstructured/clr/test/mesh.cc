@@ -9,7 +9,6 @@
 #include "flsp/unstructured/util/common.hh"
 
 #include <flecsi/util/mpi.hh>
-#include <flecsi/util/parmetis.hh>
 #include <flecsi/util/unit.hh>
 
 #include <string>

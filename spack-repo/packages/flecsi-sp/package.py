@@ -32,6 +32,7 @@ class FlecsiSp(CMakePackage):
     variant("format", default=False,
             description="add dependencies for format check")
     variant("documentation", default=False, description="Enable documentation")
+    variant("zoltan", default=False, description="Enable domain decomposition via Zoltan")
 
     ############################################################################
     # Dependnencies
@@ -46,6 +47,8 @@ class FlecsiSp(CMakePackage):
     depends_on("doxygen", when="+documentation", type="build")
     depends_on("graphviz", when="+documentation", type="build")
     depends_on("llvm@18", when="+format", type="build")
+    depends_on("parmetis@4.0.3:")
+    depends_on("zoltan+parmetis+mpi", when="+zoltan")
 
     ############################################################################
     # Build
@@ -58,6 +61,7 @@ class FlecsiSp(CMakePackage):
             self.define_from_variant("ENABLE_EXODUSII", "exodusii"),
             self.define_from_variant("ENABLE_X3D", "x3d"),
             self.define_from_variant("ENABLE_DOCUMENTATION", "documentation"),
+            self.define_from_variant("ENABLE_ZOLTAN", "zoltan"),
             self.define("ENABLE_UNIT_TESTS", self.run_tests)
         ]
 

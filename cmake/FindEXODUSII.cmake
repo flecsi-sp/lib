@@ -23,20 +23,26 @@ find_library(EXODUSII_LIBRARY NAMES exodus exoIIv2 exoIIv2c
 set(EXODUSII_LIBRARIES ${EXODUSII_LIBRARY} )
 set(EXODUSII_INCLUDE_DIRS ${EXODUSII_INCLUDE_DIR} )
 
-# if you are not using dynamic libraries, you probably need netCDF too
-# fortunately, new versions have a pretty elaborite config file
-find_package(NetCDF QUIET)
-if (NetCDF_FOUND)
-  if (EXISTS ${NetCDF_CONFIG} )
-    include( ${NetCDF_CONFIG} )
-  endif()
-  list( APPEND EXODUSII_INCLUDE_DIRS ${NETCDF_INCLUDE_DIRS} )
-  list( APPEND EXODUSII_LIBRARIES ${NETCDF_LIBRARIES} )
-endif()
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(NETCDF REQUIRED IMPORTED_TARGET netcdf)
 
 include(FindPackageHandleStandardArgs)
 # handle the QUIETLY and REQUIRED arguments and set EXODUSII_FOUND to TRUE
 # if all listed variables are TRUE
 find_package_handle_standard_args(EXODUSII DEFAULT_MSG EXODUSII_LIBRARY EXODUSII_INCLUDE_DIR )
+
+if(EXODUSII_FOUND AND NETCDF_FOUND)
+  set(EXODUSII_LIBRARIES ${EXODUSII_LIBRARY})
+  set(EXODUSII_INCLUDE_DIRS ${EXODUSII_INCLUDE_DIR})
+
+  if(NOT TARGET ExodusII::ExodusII)
+    add_library(ExodusII::ExodusII UNKNOWN IMPORTED)
+    set_target_properties(ExodusII::ExodusII PROPERTIES
+      INTERFACE_INCLUDE_DIRECTORIES "${EXODUSII_INCLUDE_DIR}")
+    set_property(TARGET ExodusII::ExodusII APPEND PROPERTY
+        IMPORTED_LOCATION "${EXODUSII_LIBRARY}")
+    target_link_libraries(ExodusII::ExodusII INTERFACE PkgConfig::NETCDF)
+  endif()
+endif()
 
 mark_as_advanced(EXODUSII_INCLUDE_DIR EXODUSII_LIBRARY)
