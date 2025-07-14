@@ -38,7 +38,7 @@ class FlecsiSp(CMakePackage):
     # Dependnencies
     ############################################################################
 
-    depends_on("flecsi@2.3:")
+    depends_on("flecsi@2.4.0:")
 
     depends_on("exodusii", when="+exodusii")
 
