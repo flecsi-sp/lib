@@ -18,7 +18,7 @@ using namespace unit;
 
 template<std::size_t D>
 int
-mesh_initialization_test() {
+mesh_initialization_test(flecsi::scheduler & sch) {
   std::string filename;
   std::vector<std::string> matfiles;
   std::vector<std::string> bndfiles;
@@ -39,19 +39,20 @@ mesh_initialization_test() {
     } // if
 
     typename mesh<D>::user_data user_data;
-    typename mesh<D>::slot m;
-    m.allocate(typename mesh<D>::mpi_coloring(
-                 flecsi::processes(), filename, matfiles, bndfiles, user_data),
+    typename mesh<D>::ptr m;
+    sch.allocate(m,
+      typename mesh<D>::mpi_coloring(
+        sch, sch.runtime(), filename, matfiles, bndfiles, user_data),
       user_data);
   }; // UNIT
 } // mesh_initialization_test
 
 int
-mesh_initialization() {
+mesh_initialization(flecsi::scheduler & sch) {
   UNIT() {
-    EXPECT_EQ(mesh_initialization_test<1>(), 0);
-    EXPECT_EQ(mesh_initialization_test<2>(), 0);
-    EXPECT_EQ(mesh_initialization_test<3>(), 0);
+    EXPECT_EQ(mesh_initialization_test<1>(sch), 0);
+    EXPECT_EQ(mesh_initialization_test<2>(sch), 0);
+    EXPECT_EQ(mesh_initialization_test<3>(sch), 0);
   };
 } // mesh_initialization
 
