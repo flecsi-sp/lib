@@ -50,6 +50,9 @@ class FlecsiSp(CMakePackage):
     depends_on("parmetis@4.0.3:")
     depends_on("zoltan+parmetis+mpi", when="+zoltan")
 
+    depends_on("c", type="build")
+    depends_on("cxx", type="build")
+
     ############################################################################
     # Build
     ############################################################################
