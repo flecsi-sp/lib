@@ -730,7 +730,7 @@ struct mesh
     Initialization task.
    *--------------------------------------------------------------------------*/
 
-  static void initialize(flecsi::scheduler & sch,
+  static void initialize(flecsi::scheduler &,
     mesh<D>::topology & s,
     coloring const &,
     const policy<D>::user_data &) {
