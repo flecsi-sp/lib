@@ -38,7 +38,7 @@ class FlecsiSp(CMakePackage):
     # Dependnencies
     ############################################################################
 
-    depends_on("flecsi@2.3:")
+    depends_on("flecsi@2.4.0:")
 
     depends_on("exodusii", when="+exodusii")
 
@@ -49,6 +49,9 @@ class FlecsiSp(CMakePackage):
     depends_on("llvm@18", when="+format", type="build")
     depends_on("parmetis@4.0.3:")
     depends_on("zoltan+parmetis+mpi", when="+zoltan")
+
+    depends_on("c", type="build")
+    depends_on("cxx", type="build")
 
     ############################################################################
     # Build

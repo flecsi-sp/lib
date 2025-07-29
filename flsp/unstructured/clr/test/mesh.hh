@@ -234,7 +234,7 @@ struct mesh
    *--------------------------------------------------------------------------*/
 
   using typename mesh<D>::specialization::base;
-  using typename mesh<D>::specialization::core;
+  using typename mesh<D>::specialization::topology;
   using coloring =
     typename flecsi::topo::specialization<flecsi::topo::unstructured,
       mesh<D>>::coloring;
@@ -398,11 +398,13 @@ struct mesh
     Coloring method.
    *--------------------------------------------------------------------------*/
 
-  static coloring color(Color num_colors,
+  static coloring color(const flecsi::runtime & r,
     std::string const & filename,
     std::vector<std::string> const & matfiles,
     std::vector<std::string> const & bndfiles,
     user_data & user_data) {
+
+    Color num_colors = r.processes();
 
     std::unique_ptr<io::definition_base<policy, D>> md =
       io::make_definition<policy, D>(filename, matfiles, bndfiles);
@@ -728,7 +730,8 @@ struct mesh
     Initialization task.
    *--------------------------------------------------------------------------*/
 
-  static void initialize(flecsi::data::topology_slot<mesh<D>> & s,
+  static void initialize(flecsi::scheduler & sch,
+    mesh<D>::topology & s,
     coloring const &,
     const policy<D>::user_data &) {
 
@@ -736,17 +739,17 @@ struct mesh
       Resize connectivity storage.
      *------------------------------------------------------------------------*/
     auto & c2v =
-      s->template get_connectivity<index_space::cells, index_space::vertices>();
+      s.template get_connectivity<index_space::cells, index_space::vertices>();
     auto & v2c =
-      s->template get_connectivity<index_space::vertices, index_space::cells>();
+      s.template get_connectivity<index_space::vertices, index_space::cells>();
 
     c2v(s).get_elements().resize();
     v2c(s).get_elements().resize();
 
     if constexpr(D == 2 || D == 3) {
       auto & c2f =
-        s->template get_connectivity<index_space::cells, index_space::faces>();
-      auto & f2v = s->template get_connectivity<index_space::faces,
+        s.template get_connectivity<index_space::cells, index_space::faces>();
+      auto & f2v = s.template get_connectivity<index_space::faces,
         index_space::vertices>();
 
       c2f(s).get_elements().resize();
@@ -755,8 +758,8 @@ struct mesh
 
     if constexpr(D == 3) {
       auto & c2e =
-        s->template get_connectivity<index_space::cells, index_space::edges>();
-      auto & e2v = s->template get_connectivity<index_space::edges,
+        s.template get_connectivity<index_space::cells, index_space::edges>();
+      auto & e2v = s.template get_connectivity<index_space::edges,
         index_space::vertices>();
 
       c2e(s).get_elements().resize();
