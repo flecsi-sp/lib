@@ -52,7 +52,8 @@ inline std::vector<flecsi::Color>
 color(const flecsi::util::offsets & dist,
   const flecsi::util::crs & graph,
   flecsi::Color colors,
-  const flsp::util::coloring_options & co = flsp::util::coloring_options(),
+  [[maybe_unused]] const flsp::util::coloring_options & co =
+    flsp::util::coloring_options(),
   MPI_Comm comm = MPI_COMM_WORLD) {
 
   auto [rank, size] = flecsi::util::mpi::info(comm);
