@@ -194,7 +194,7 @@ color(const flecsi::util::offsets & dist,
   zz.LB_Free_Part(
     &export_global_ids, &export_local_ids, &export_procs, &export_to_part);
 
-  return std::move(part);
+  return part;
 #else
   flog_fatal("trying to use Zoltan domain decomposition but FleCSI-SP is not "
              "built with ENABLE_ZOLTAN");
