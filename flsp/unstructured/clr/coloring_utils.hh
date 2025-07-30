@@ -1215,8 +1215,8 @@ color_local_auxiliaries(util::crs const & lc2a,
 
         // Keep track of halo cells
         for(auto ci : a2c[anc]) {
-          if(cshr.count(gco) && cshr.at(gco).count(ci) ||
-             cghst.count(gco) && cghst.at(gco).count(ci)) {
+          if((cshr.count(gco) && cshr.at(gco).count(ci)) ||
+             (cghst.count(gco) && cghst.at(gco).count(ci))) {
             halo = true;
             break;
           } // if

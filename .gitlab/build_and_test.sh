@@ -189,6 +189,7 @@ prepare_env() {
     # done
 
     spack develop -b ${BUILD_DIR} -p ${SOURCE_DIR} --no-clone ${PROJECT_NAME}@${PROJECT_DEFAULT_BRANCH}
+    spack config add "packages:${PROJECT_NAME}:package_attributes:keep_werror:all"
 
     if [[ "${SPACK_ENV_NAME}" == "custom-spec" ]]; then
         spack add ${SPACK_ENV_SPEC}

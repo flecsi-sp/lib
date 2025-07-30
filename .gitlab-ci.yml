@@ -23,6 +23,14 @@ format:
   extends: [.ascgit_job, .darwin_job, .darwin_regular_job, .clang_format]
   stage: prechecks
 
+check_warnings:
+  allow_failure: true
+  extends: [.ascgit_job, .darwin_job, .darwin_regular_job, .check_warnings]
+  stage: prechecks
+  variables:
+    SPACK_ENV_NAME: "custom-file"
+    SPACK_ENV_FILE: ${CI_PROJECT_DIR}/spack-repo/custom/flecsi_sp_legion.yaml
+
 ###############################################################################
 # Darwin
 ###############################################################################

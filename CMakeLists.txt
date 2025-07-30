@@ -80,6 +80,14 @@ if(ENABLE_FORMAT)
 endif()
 
 #------------------------------------------------------------------------------#
+# Warnings
+#------------------------------------------------------------------------------#
+
+option(ENABLE_WARNINGS "Build with warnings" ON)
+option(WARNINGS_FATAL "Make all warnings fatal errors" OFF)
+mark_as_advanced(WARNINGS_FATAL)
+
+#------------------------------------------------------------------------------#
 # Documentation
 #------------------------------------------------------------------------------#
 
@@ -187,6 +195,19 @@ if(ENABLE_LIBRARY)
 
   if(ENABLE_EXODUSII)
     flecsi_sp_enable_exodusii(FleCSI-SP)
+  endif()
+
+  if(ENABLE_WARNINGS)
+    target_compile_options(FleCSI-SP INTERFACE -Wall -Wundef -W -Wvla -Wextra-semi $<$<CXX_COMPILER_ID:Clang>:-fcolor-diagnostics>)
+        if(Kokkos_ENABLE_HIP)
+      target_compile_options(FleCSI-SP INTERFACE -Wno-unused-command-line-argument)
+    endif()
+    if(Kokkos_ENABLE_CUDA)
+      target_compile_options(FleCSI-SP INTERFACE -Wno-unknown-cuda-version)
+    endif()
+    if(WARNINGS_FATAL)
+      target_compile_options(FleCSI-SP INTERFACE -Werror)
+    endif()
   endif()
 
   #----------------------------------------------------------------------------#

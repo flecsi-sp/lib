@@ -107,12 +107,12 @@ color(const flecsi::util::offsets & dist,
     &ud);
   zz.Set_Obj_List_Fn(
     [](void * data,
-      int num_gid_entries,
-      int num_lid_entries,
+      int /* num_gid_entries */,
+      int /* num_lid_entries */,
       ZOLTAN_ID_PTR global_ids,
       ZOLTAN_ID_PTR local_ids,
       int wgt_dim,
-      float * obj_wgts,
+      float * /* obj_wgts */,
       int * ierr) {
       auto ud = static_cast<const zoltan_user_data *>(data);
       if(wgt_dim != 0) {
@@ -128,16 +128,16 @@ color(const flecsi::util::offsets & dist,
       *ierr = ZOLTAN_OK;
     },
     &ud);
-  zz.Set_Num_Geom_Fn([](void * data, int * ierr) -> int {
+  zz.Set_Num_Geom_Fn([](void * /* data */, int * ierr) -> int {
     *ierr = ZOLTAN_OK;
     return D;
   });
   // zz.Set_Geom_Fn();
   zz.Set_Num_Edges_Fn(
     [](void * data,
-      int num_gid_entries,
-      int num_lid_entries,
-      ZOLTAN_ID_PTR global_id,
+      int /* num_gid_entries */,
+      int /* num_lid_entries */,
+      ZOLTAN_ID_PTR /* global_id */,
       ZOLTAN_ID_PTR local_id,
       int * ierr) -> int {
       auto ud = static_cast<const zoltan_user_data *>(data);
@@ -147,14 +147,14 @@ color(const flecsi::util::offsets & dist,
     &ud);
   zz.Set_Edge_List_Fn(
     [](void * data,
-      int num_gid_entries,
-      int num_lid_entries,
-      ZOLTAN_ID_PTR global_id,
+      int /* num_gid_entries */,
+      int /* num_lid_entries */,
+      ZOLTAN_ID_PTR /* global_id */,
       ZOLTAN_ID_PTR local_id,
       ZOLTAN_ID_PTR nbor_global_id,
       int * nbor_procs,
       int wgt_dim,
-      float * ewgts,
+      float * /* ewgts */,
       int * ierr) {
       auto ud = static_cast<const zoltan_user_data *>(data);
       if(wgt_dim != 0) {
@@ -194,7 +194,7 @@ color(const flecsi::util::offsets & dist,
   zz.LB_Free_Part(
     &export_global_ids, &export_local_ids, &export_procs, &export_to_part);
 
-  return std::move(part);
+  return part;
 #else
   flog_fatal("trying to use Zoltan domain decomposition but FleCSI-SP is not "
              "built with ENABLE_ZOLTAN");
