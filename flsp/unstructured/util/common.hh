@@ -57,9 +57,9 @@ sign_bit(T oid) {
   @param oid The ones' complement id.
  */
 template<typename T>
-inline auto
+inline T
 get_id(T oid) {
-  return sign_bit(oid) ? ~oid : oid;
+  return sign_bit(+oid) ? T{~oid} : oid;
 }
 
 /*!
@@ -79,7 +79,7 @@ get_id(T oid) {
 template<typename T>
 inline auto
 get_sign_id(T oid) {
-  return std::make_pair(-2 * sign_bit(oid) + 1, get_id(oid));
+  return std::make_pair(-2 * sign_bit(+oid) + 1, get_id(oid));
 }
 
 /*!
