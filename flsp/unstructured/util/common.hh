@@ -35,19 +35,28 @@ using flecsi::util::unique_each;
 template<std::size_t D>
 using point = std::array<double, D>;
 
+namespace detail {
+template<typename T>
+inline bool
+sign_bit(T id) {
+  static_assert(std::is_integral_v<T>, "non-integral type");
+  return std::signbit(static_cast<std::make_signed_t<T>>(id));
+}
+} // namespace detail
+
 /*!
   Test if the sign bit is set for ids stored using the ones' complement
   strategy for orientation information. When set, this implies that the entity
   referenced by @em oid has a negative orientation with respect to its
   connected entity type.
 
-  @param oid The id to test.
+  @param oid The id to test. The id is promoted to integer before being tested.
   @return true if sign bit is set, false otherwise.
  */
 template<typename T>
-inline auto
+inline bool
 sign_bit(T oid) {
-  return std::signbit(static_cast<std::make_signed_t<T>>(oid));
+  return detail::sign_bit(+oid);
 }
 
 /*!
@@ -59,7 +68,7 @@ sign_bit(T oid) {
 template<typename T>
 inline T
 get_id(T oid) {
-  return sign_bit(+oid) ? T{~oid} : oid;
+  return sign_bit(oid) ? T{~oid} : oid;
 }
 
 /*!
@@ -79,7 +88,7 @@ get_id(T oid) {
 template<typename T>
 inline auto
 get_sign_id(T oid) {
-  return std::make_pair(-2 * sign_bit(+oid) + 1, get_id(oid));
+  return std::make_pair(-2 * sign_bit(oid) + 1, get_id(oid));
 }
 
 /*!
