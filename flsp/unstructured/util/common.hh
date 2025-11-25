@@ -136,6 +136,17 @@ operator<<(std::ostream & stream, scrs const & graph) {
   return stream << std::endl;
 } // operator<<
 
+template<class T>
+void
+concatenate(std::vector<T> & v, Color total, MPI_Comm comm) {
+  auto g = flecsi::util::mpi::all_gatherv(v, comm);
+  v.clear();
+  v.reserve(total);
+  for(auto & g1 : g)
+    for(auto & t : g1)
+      v.push_back(std::move(t));
+}
+
 /// \}
 } // namespace util
 } // namespace flsp::unstructured
