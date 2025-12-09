@@ -34,7 +34,7 @@ compute_interval_sizes(coloring::index_space & clrng,
   auto & local_itvls = clrng.num_intervals;
   for(auto & c : clrng.colors)
     local_itvls.push_back(c.ghost_intervals().size());
-  flecsi::topo::concatenate(local_itvls, colors, comm);
+  util::concatenate(local_itvls, colors, comm);
 }
 
 /*!
@@ -690,9 +690,9 @@ close_cells(util::equal_map const & cem,
 
   } // scope
 
-  flecsi::topo::concatenate(is_peers, pem.total(), comm);
+  util::concatenate(is_peers, pem.total(), comm);
 
-  flecsi::topo::concatenate(partitions, pem.total(), comm);
+  util::concatenate(partitions, pem.total(), comm);
 
   compute_interval_sizes(clrng.idx_spaces[cidx], pem.total(), comm);
 
@@ -1018,12 +1018,12 @@ close_vertices(util::equal_map const & vem,
     Gather the tight peer information for the vertices.
    */
 
-  flecsi::topo::concatenate(is_peers, pem.total(), comm);
+  util::concatenate(is_peers, pem.total(), comm);
 
   /*
     Gather partition sizes or vertices.
    */
-  flecsi::topo::concatenate(vert_partitions, pem.total(), comm);
+  util::concatenate(vert_partitions, pem.total(), comm);
 
   /*
    * Compute vertex ghost interval sizes
@@ -1650,13 +1650,13 @@ close_auxiliaries(util::equal_map const & pem,
     Gather the tight peer information for this auxiliary entity type.
    */
 
-  flecsi::topo::concatenate(is_peers, pem.total(), comm);
+  util::concatenate(is_peers, pem.total(), comm);
 
   /*
     Gather partition sizes for entities.
    */
 
-  flecsi::topo::concatenate(parts, pem.total(), comm);
+  util::concatenate(parts, pem.total(), comm);
 
   /*
    * Compute aux ghost interval sizes
