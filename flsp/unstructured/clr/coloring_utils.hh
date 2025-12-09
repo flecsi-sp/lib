@@ -1065,7 +1065,9 @@ close_vertices(util::equal_map const & vem,
                auxiliary kinds (std::optional), e.g., sides require
                cell-to-face information in 3D.
  */
-template<template<std::size_t> typename P, std::size_t D, P<D>::index_space IS>
+template<template<std::size_t> typename P,
+  std::size_t D,
+  typename P<D>::index_space IS>
 auto
 create_auxiliaries(std::vector<util::gid> const & cells,
   util::crs const & c2v,
@@ -1152,7 +1154,7 @@ enum class heuristic { vertices, cells };
  */
 template<template<std::size_t> typename P,
   std::size_t D,
-  P<D>::index_space IS,
+  typename P<D>::index_space IS,
   heuristic H = heuristic::vertices>
 auto
 color_local_auxiliaries(util::crs const & lc2a,
@@ -1286,7 +1288,9 @@ assign_global_ids(util::gid cnt, MPI_Comm comm = MPI_COMM_WORLD) {
 /*!
   Assign colors and global ids to the auxiliaries with index @em aidx.
  */
-template<template<std::size_t> typename P, std::size_t D, P<D>::index_space IS>
+template<template<std::size_t> typename P,
+  std::size_t D,
+  typename P<D>::index_space IS>
 auto
 color_auxiliaries(util::equal_map const & pem,
   util::gid cnt,
@@ -1691,7 +1695,7 @@ close_auxiliaries(util::equal_map const & pem,
  */
 template<template<std::size_t> typename P,
   std::size_t D,
-  P<D>::index_space IS,
+  typename P<D>::index_space IS,
   heuristic H = heuristic::vertices>
 inline auto
 add_auxiliaries(util::equal_map const & pem,
@@ -1790,7 +1794,9 @@ get_connectivity(
   return cnxs;
 } // get_connectivity
 
-template<template<std::size_t> typename P, std::size_t D, P<D>::index_space IS>
+template<template<std::size_t> typename P,
+  std::size_t D,
+  typename P<D>::index_space IS>
 inline std::enable_if_t<IS == P<D>::edges || IS == P<D>::faces, void>
 convert_connectivity(
   std::vector<process_primary_color_data> const & cell_pcdata,
@@ -1837,7 +1843,9 @@ convert_connectivity(
   } // for
 } // convert_connectivity
 
-template<template<std::size_t> typename P, std::size_t D, P<D>::index_space IS>
+template<template<std::size_t> typename P,
+  std::size_t D,
+  typename P<D>::index_space IS>
 inline std::enable_if_t<IS == P<D>::corners || IS == P<D>::sides, void>
 convert_connectivity(
   std::vector<process_primary_color_data> const & cell_pcdata,

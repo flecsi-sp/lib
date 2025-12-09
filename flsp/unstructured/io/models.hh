@@ -30,7 +30,9 @@ struct seg2 {
 }; // struct seg2
 // clang-format on
 
-template<template<std::size_t> typename P, std::size_t D, P<D>::index_space IS>
+template<template<std::size_t> typename P,
+  std::size_t D,
+  typename P<D>::index_space IS>
 auto
 create_cell_entities(std::tuple<util::gid, util::id, util::id> const &,
   util::crs const &,
@@ -78,7 +80,9 @@ struct quad4 {
 // clang-format on
 
 // 2D Edges.
-template<template<std::size_t> typename P, std::size_t D, P<D>::index_space IS>
+template<template<std::size_t> typename P,
+  std::size_t D,
+  typename P<D>::index_space IS>
 auto
 create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
   util::crs const & c2v,
@@ -113,7 +117,9 @@ create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
 } // create_cell_entities
 
 // 2D Sides.
-template<template<std::size_t> typename P, std::size_t D, P<D>::index_space IS>
+template<template<std::size_t> typename P,
+  std::size_t D,
+  typename P<D>::index_space IS>
 auto
 create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
   util::crs const & c2v,
@@ -286,7 +292,9 @@ struct hex8 {
 // clang-format on
 
 // 3D Edges.
-template<template<std::size_t> typename P, std::size_t D, P<D>::index_space IS>
+template<template<std::size_t> typename P,
+  std::size_t D,
+  typename P<D>::index_space IS>
 auto
 create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
   util::crs const & c2v,
@@ -321,7 +329,9 @@ create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
 } // create_cell_entities
 
 // 3D Faces.
-template<template<std::size_t> typename P, std::size_t D, P<D>::index_space IS>
+template<template<std::size_t> typename P,
+  std::size_t D,
+  typename P<D>::index_space IS>
 auto
 create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
   util::crs const & c2v,
@@ -359,7 +369,9 @@ create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
 } // create_cell_entities
 
 // 3D Sides.
-template<template<std::size_t> typename P, std::size_t D, P<D>::index_space IS>
+template<template<std::size_t> typename P,
+  std::size_t D,
+  typename P<D>::index_space IS>
 auto
 create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
   util::crs const & c2v,
@@ -417,7 +429,9 @@ create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
 } // create_cell_entities
 
 // 1D, 2D, and 3D Corners.
-template<template<std::size_t> typename P, std::size_t D, P<D>::index_space IS>
+template<template<std::size_t> typename P,
+  std::size_t D,
+  typename P<D>::index_space IS>
 auto
 create_cell_entities(std::tuple<util::gid, util::id, util::id> const & cid,
   util::crs const & c2v,

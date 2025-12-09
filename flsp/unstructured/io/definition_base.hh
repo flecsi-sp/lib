@@ -15,7 +15,7 @@ namespace flsp::unstructured::io {
 
 template<template<std::size_t> typename P,
   std::size_t D,
-  P<D>::index_space... Ks>
+  typename P<D>::index_space... Ks>
 struct required_keys {
   static constexpr bool value{true};
 };
@@ -64,7 +64,7 @@ struct definition_base {
     Return the global number of entities of the given kind.
    */
 
-  virtual util::gid num_entities(P<D>::index_space is) const = 0;
+  virtual util::gid num_entities(typename P<D>::index_space is) const = 0;
 
   /*!
     Return relational information for the given cell range.
@@ -100,7 +100,7 @@ struct definition_base {
 template<template<std::size_t> typename P, std::size_t D>
 struct undefined_definition : definition_base<P, D> {
   undefined_definition() {}
-  util::gid num_entities(P<D>::index_space) const override {
+  util::gid num_entities(typename P<D>::index_space) const override {
     flog_fatal("undefined mesh definition");
     return {};
   }
