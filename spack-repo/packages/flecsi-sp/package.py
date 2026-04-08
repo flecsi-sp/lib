@@ -35,13 +35,14 @@ class FlecsiSp(CMakePackage):
     variant("zoltan", default=False, description="Enable domain decomposition via Zoltan")
 
     ############################################################################
-    # Dependnencies
+    # Dependencies
     ############################################################################
 
     depends_on("flecsi@2.4.0:")
 
     depends_on("exodusii", when="+exodusii")
 
+    depends_on("cmake@3.27:")
     depends_on("py-sphinx", when="+documentation", type="build")
     depends_on("py-sphinx-rtd-theme", when="+documentation", type="build")
     depends_on("doxygen", when="+documentation", type="build")
