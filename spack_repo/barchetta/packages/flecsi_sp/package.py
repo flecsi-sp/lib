@@ -1,5 +1,5 @@
+from spack_repo.builtin.build_systems.cmake import CMakePackage
 from spack.package import *
-
 
 class FlecsiSp(CMakePackage):
     """The FleCSI-SP library provides utilities for creating FleCSI specializations
@@ -25,24 +25,26 @@ class FlecsiSp(CMakePackage):
 
     variant("exodusii", default=True,
             description="Build with support for the ExodusII file format"
-            )
+    )
     variant("x3d", default=True,
             description="Build with support for the X3D file format"
-            )
+    )
     variant("format", default=False,
-            description="add dependencies for format check")
+        description="add dependencies for format check")
     variant("documentation", default=False, description="Enable documentation")
     variant("zoltan", default=False, description="Enable domain decomposition via Zoltan")
 
     ############################################################################
-    # Dependencies
+    # Dependnencies
     ############################################################################
+
+    depends_on("c", type="build")
+    depends_on("cxx", type="build")
 
     depends_on("flecsi@2.4.0:")
 
     depends_on("exodusii", when="+exodusii")
 
-    depends_on("cmake@3.27:")
     depends_on("py-sphinx", when="+documentation", type="build")
     depends_on("py-sphinx-rtd-theme", when="+documentation", type="build")
     depends_on("doxygen", when="+documentation", type="build")
@@ -50,9 +52,6 @@ class FlecsiSp(CMakePackage):
     depends_on("llvm@18", when="+format", type="build")
     depends_on("parmetis@4.0.3:")
     depends_on("zoltan+parmetis+mpi", when="+zoltan")
-
-    depends_on("c", type="build")
-    depends_on("cxx", type="build")
 
     ############################################################################
     # Build
@@ -70,3 +69,4 @@ class FlecsiSp(CMakePackage):
         ]
 
         return options
+
