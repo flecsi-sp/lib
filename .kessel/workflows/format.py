@@ -16,6 +16,10 @@ class Format(BuildEnvironment, CMake):
     def ci_message(self, args):
         return super().ci_message(args, post_alloc_init="source .gitlab/kessel.sh")
 
+    def prepare_env(self, args):
+        super().prepare_env(args)
+        super().exec("spack config add packages:flecsi-sp:require:+format")
+
     @collapsed
     def configure(self, args):
         """Configure"""
