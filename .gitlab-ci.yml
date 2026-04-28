@@ -9,12 +9,6 @@ variables:
   GIT_SUBMODULE_STRATEGY: normal
   ENABLE_CDASH: false
   ENABLED_CLUSTERS: "darwin"
-  # use this variable if there is a deployment MR you want to use instead
-  PROJECT_SPACK_ENV_VERSION: "2025-06-30"
-  V100_CONSTRAINT: "--constraint=\"cpu_family:haswell&(gpu1_model:Tesla_V100S-PCIE-32GB|gpu1_model:Tesla_V100-PCIE-32GB)\""
-  HSA_OVERRIDE_CPU_AFFINITY_DEBUG: 0
-  #AMD_SERIALIZE_KERNEL: 3
-  #AMD_SERIALIZE_COPY: 3
 
 include:
  - .gitlab/common.yml
@@ -27,210 +21,29 @@ check_warnings:
   allow_failure: true
   extends: [.ascgit_job, .darwin_job, .darwin_regular_job, .check_warnings]
   stage: prechecks
-  variables:
-    SPACK_ENV_NAME: "custom-file"
-    SPACK_ENV_FILE: ${CI_PROJECT_DIR}/spack-repo/custom/flecsi_sp_legion.yaml
 
 ###############################################################################
 # Darwin
 ###############################################################################
 
-darwin_flecsi-sp-lib_test_mpi:
+darwin_flecsi-sp-lib_test_mpi_gnu:
   stage: mpi
   extends: [.ascgit_job, .darwin_job, .darwin_regular_job, .build_and_test]
   needs: []
   variables:
-    SPACK_ENV_NAME: "custom-file"
-    SPACK_ENV_FILE: ${CI_PROJECT_DIR}/spack-repo/custom/flecsi_sp_mpi.yaml
+    SPACK_ENV_NAME: "mpi/openmpi-gnu"
 
-darwin_flecs-sp-lib_test_legion:
+# darwin_flecsi-sp-lib_test_mpi_cuda:
+#   stage: mpi
+#   extends: [.ascgit_job, .darwin_job, .darwin_regular_job, .build_and_test]
+#   needs: []
+#   variables:
+#     SPACK_ENV_NAME: "mpi/openmpi-cuda-clang"
+#     SCHEDULER_PARAMETERS: "-N 1 --qos=debug -p shared-gpu-ampere"
+
+darwin_flecsi-sp-lib_test_legion:
   stage: legion
   extends: [.ascgit_job, .darwin_job, .darwin_regular_job, .build_and_test]
   needs: []
   variables:
-    SPACK_ENV_NAME: "custom-file"
-    SPACK_ENV_FILE: ${CI_PROJECT_DIR}/spack-repo/custom/flecsi_sp_legion.yaml
-
-# darwin_legion_openmp_mpich_debug:
-#   stage: legion
-#   extends: [.ascgit_job, .darwin_job, .darwin_regular_job, .build_and_test]
-#   needs: []
-#   variables:
-#     SPACK_ENV_NAME: legion/openmp/mpich-debug
-
-# darwin_legion_openmp_mpich_nomio_debug:
-#   stage: legion
-#   extends: [.ascgit_job, .darwin_job, .darwin_regular_job, .build_and_test]
-#   needs: []
-#   variables:
-#     SPACK_ENV_NAME: legion/openmp/mpich-nomio-debug
-
-# darwin_legion_openmp_mpich_release:
-#   stage: legion
-#   extends: [.ascgit_job, .darwin_job, .darwin_regular_default_branch_only_job, .build_and_test]
-#   needs: []
-#   variables:
-#     SPACK_ENV_NAME: legion/openmp/mpich-release
-
-# darwin_legion_openmp_mpich_nomio_release:
-#   stage: legion
-#   extends: [.ascgit_job, .darwin_job, .darwin_regular_default_branch_only_job, .build_and_test]
-#   needs: []
-#   variables:
-#     SPACK_ENV_NAME: legion/openmp/mpich-nomio-release
-
-# darwin_legion_cuda_mpich_ampere_debug:
-#   stage: legion
-#   extends: [.ascgit_job, .darwin_job, .darwin_regular_job, .build_and_test]
-#   needs: []
-#   variables:
-#     SPACK_ENV_NAME: legion/cuda/mpich-ampere-debug
-#     SCHEDULER_PARAMETERS: "-N 1 --qos=debug -p shared-gpu-ampere"
-
-# darwin_legion_cuda_mpich_ampere_release:
-#   stage: legion
-#   extends: [.ascgit_job, .darwin_job, .darwin_regular_default_branch_only_job, .build_and_test]
-#   needs: []
-#   variables:
-#     SPACK_ENV_NAME: legion/cuda/mpich-ampere-release
-#     SCHEDULER_PARAMETERS: "-N 1 --qos=debug -p shared-gpu-ampere"
-
-# darwin_legion_cuda_mpich_volta_debug:
-#   stage: legion
-#   extends: [.ascgit_job, .darwin_job, .darwin_regular_job, .build_and_test]
-#   needs: []
-#   variables:
-#     SPACK_ENV_NAME: legion/cuda/mpich-volta-debug
-#     SCHEDULER_PARAMETERS: "-N 1 --qos=debug -p volta-x86 ${V100_CONSTRAINT}"
-
-# darwin_legion_cuda_mpich_volta_release:
-#   stage: legion
-#   extends: [.ascgit_job, .darwin_job, .darwin_regular_default_branch_only_job, .build_and_test]
-#   needs: []
-#   variables:
-#     SPACK_ENV_NAME: legion/cuda/mpich-volta-release
-#     SCHEDULER_PARAMETERS: "-N 1 --qos=debug -p volta-x86 ${V100_CONSTRAINT}"
-
-# darwin_legion_rocm_mpich_gfx90a_debug:
-#   stage: legion
-#   extends: [.ascgit_job, .darwin_job, .darwin_regular_job, .build_and_test]
-#   needs: []
-#   variables:
-#     SPACK_ENV_NAME: legion/rocm/mpich-gfx90a-debug
-#     SCHEDULER_PARAMETERS: "-N 1 --qos=debug -p shared-gpu-amd-mi250"
-
-# darwin_legion_rocm_mpich_gfx90a_debug_2d:
-#   stage: legion
-#   extends: [.ascgit_job, .darwin_job, .darwin_regular_job, .build_and_test]
-#   needs: []
-#   variables:
-#     SPACK_ENV_NAME: legion/rocm/mpich-gfx90a-debug-2d
-#     SCHEDULER_PARAMETERS: "-N 1 --qos=debug -p shared-gpu-amd-mi250"
-
-# darwin_legion_rocm_mpich_gfx90a_release:
-#   stage: legion
-#   extends: [.ascgit_job, .darwin_job, .darwin_regular_default_branch_only_job, .build_and_test]
-#   needs: []
-#   variables:
-#     SPACK_ENV_NAME: legion/rocm/mpich-gfx90a-release
-#     SCHEDULER_PARAMETERS: "-N 1 --qos=debug -p shared-gpu-amd-mi250"
-
-# darwin_legion_rocm_mpich_gfx90a_release_2d:
-#   stage: legion
-#   extends: [.ascgit_job, .darwin_job, .darwin_regular_default_branch_only_job, .build_and_test]
-#   needs: []
-#   variables:
-#     SPACK_ENV_NAME: legion/rocm/mpich-gfx90a-release-2d
-#     SCHEDULER_PARAMETERS: "-N 1 --qos=debug -p shared-gpu-amd-mi250"
-
-# darwin_mpi_serial_mpich_debug:
-#   stage: mpi
-#   extends: [.ascgit_job, .darwin_job, .darwin_regular_job, .build_and_test]
-#   needs: []
-#   variables:
-#     SPACK_ENV_NAME: mpi/serial/mpich-debug
-
-# darwin_mpi_serial_mpich_release:
-#   stage: mpi
-#   extends: [.ascgit_job, .darwin_job, .darwin_regular_default_branch_only_job, .build_and_test]
-#   needs: []
-#   variables:
-#     SPACK_ENV_NAME: mpi/serial/mpich-release
-
-# darwin_mpi_openmp_mpich_debug:
-#   stage: mpi
-#   extends: [.ascgit_job, .darwin_job, .darwin_regular_job, .build_and_test]
-#   needs: []
-#   variables:
-#     SPACK_ENV_NAME: mpi/openmp/mpich-debug
-
-# darwin_mpi_openmp_mpich_release:
-#   stage: mpi
-#   extends: [.ascgit_job, .darwin_job, .darwin_regular_default_branch_only_job, .build_and_test]
-#   needs: []
-#   variables:
-#     SPACK_ENV_NAME: mpi/openmp/mpich-release
-
-# darwin_mpi_cuda_mpich_ampere_debug:
-#   stage: mpi
-#   extends: [.ascgit_job, .darwin_job, .darwin_regular_job, .build_and_test]
-#   needs: []
-#   variables:
-#     SPACK_ENV_NAME: mpi/cuda/mpich-ampere-debug
-#     SCHEDULER_PARAMETERS: "-N 1 --qos=debug -p shared-gpu-ampere"
-
-# darwin_mpi_cuda_mpich_ampere_release:
-#   stage: mpi
-#   extends: [.ascgit_job, .darwin_job, .darwin_regular_default_branch_only_job, .build_and_test]
-#   needs: []
-#   variables:
-#     SPACK_ENV_NAME: mpi/cuda/mpich-ampere-release
-#     SCHEDULER_PARAMETERS: "-N 1 --qos=debug -p shared-gpu-ampere"
-
-# darwin_mpi_cuda_mpich_volta_debug:
-#   stage: mpi
-#   extends: [.ascgit_job, .darwin_job, .darwin_regular_job, .build_and_test]
-#   needs: []
-#   variables:
-#     SPACK_ENV_NAME: mpi/cuda/mpich-volta-debug
-#     SCHEDULER_PARAMETERS: "-N 1 --qos=debug -p volta-x86 ${V100_CONSTRAINT}"
-
-# darwin_mpi_cuda_mpich_volta_release:
-#   stage: mpi
-#   extends: [.ascgit_job, .darwin_job, .darwin_regular_default_branch_only_job, .build_and_test]
-#   needs: []
-#   variables:
-#     SPACK_ENV_NAME: mpi/cuda/mpich-volta-release
-#     SCHEDULER_PARAMETERS: "-N 1 --qos=debug -p volta-x86 ${V100_CONSTRAINT}"
-
-# darwin_mpi_rocm_mpich_gfx90a_debug:
-#   stage: mpi
-#   extends: [.ascgit_job, .darwin_job, .darwin_regular_job, .build_and_test]
-#   needs: []
-#   variables:
-#     SPACK_ENV_NAME: mpi/rocm/mpich-gfx90a-debug
-#     SCHEDULER_PARAMETERS: "-N 1 --qos=debug -p shared-gpu-amd-mi250"
-
-# darwin_mpi_rocm_mpich_gfx90a_debug_2d:
-#   stage: mpi
-#   extends: [.ascgit_job, .darwin_job, .darwin_regular_job, .build_and_test]
-#   needs: []
-#   variables:
-#     SPACK_ENV_NAME: mpi/rocm/mpich-gfx90a-debug-2d
-#     SCHEDULER_PARAMETERS: "-N 1 --qos=debug -p shared-gpu-amd-mi250"
-
-# darwin_mpi_rocm_mpich_gfx90a_release:
-#   stage: mpi
-#   extends: [.ascgit_job, .darwin_job, .darwin_regular_default_branch_only_job, .build_and_test]
-#   needs: []
-#   variables:
-#     SPACK_ENV_NAME: mpi/rocm/mpich-gfx90a-release
-#     SCHEDULER_PARAMETERS: "-N 1 --qos=debug -p shared-gpu-amd-mi250"
-
-# darwin_mpi_rocm_mpich_gfx90a_release_2d:
-#   stage: mpi
-#   extends: [.ascgit_job, .darwin_job, .darwin_regular_default_branch_only_job, .build_and_test]
-#   needs: []
-#   variables:
-#     SPACK_ENV_NAME: mpi/rocm/mpich-gfx90a-release-2d
-#     SCHEDULER_PARAMETERS: "-N 1 --qos=debug -p shared-gpu-amd-mi250"
+    SPACK_ENV_NAME: "legion/openmpi-gnu"
