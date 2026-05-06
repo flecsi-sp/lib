@@ -10,15 +10,11 @@ class Format(BuildEnvironment, CMake):
     allow_lockfile_changes = True
 
     build_dir = environment(Path.cwd() / "build_format")
-    spack_env = environment("barchetta-format")
+    spack_env = environment("flecsi-sp-format")
     project_spec = environment("flecsi-sp+format")
 
     def ci_message(self, args):
         return super().ci_message(args, post_alloc_init="source .gitlab/kessel.sh")
-
-    def prepare_env(self, args):
-        super().prepare_env(args)
-        super().exec("spack config add packages:flecsi-sp:require:+format")
 
     @collapsed
     def configure(self, args):

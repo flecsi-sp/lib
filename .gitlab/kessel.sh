@@ -1,10 +1,10 @@
 # Helper script that detects a deployment on a cluster.
 # Intended to work on sh, zsh, and bash.
-DEPLOYMENT_VERSION="2026-03-10"
+DEPLOYMENT_VERSION="2026-05-06"
 SCRIPT_PATH=${BASH_SOURCE[0]:-${(%):-%x}}
 PARENT_DIR=$( cd "$( dirname "${SCRIPT_PATH}" )" &>/dev/null && pwd )
 
-export BARCHETTA_CHECKOUT=$(realpath $PARENT_DIR/..)
+export FLECSI_SP_CHECKOUT=$(realpath $PARENT_DIR/..)
 
 if command -v sacctmgr >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
   SYSTEM_NAME=$(sacctmgr list --json clusters  | jq -r '.clusters[0].name')
@@ -20,7 +20,7 @@ _KESSEL_WORKFLOW_DEPLOYMENT="$KESSEL_WORKFLOW_DEPLOYMENT"
 export KESSEL_WORKFLOW_DEPLOYMENT=${KESSEL_WORKFLOW_DEPLOYMENT:-${TMPDIR:-/tmp}/$USER-ci-envs}
 
 if [ "$SYSTEM_NAME" = "darwin" ]; then
-  export KESSEL_DEPLOYMENT=${KESSEL_DEPLOYMENT:-/usr/projects/tpp/apps/deployments/barchetta/${DEPLOYMENT_VERSION}}
+  export KESSEL_DEPLOYMENT=${KESSEL_DEPLOYMENT:-/usr/projects/tpp/apps/deployments/flecsi-sp/${DEPLOYMENT_VERSION}}
 else
   echo "ERROR: Unknown system!" >&2
   return 1

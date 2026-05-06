@@ -10,7 +10,7 @@ class Warning(BuildEnvironment, CMake):
     allow_lockfile_changes = True
 
     build_dir = environment(Path.cwd() / "build_warnings")
-    spack_env = environment("barchetta-warning")
+    spack_env = environment("flecsi-sp-warning")
     project_spec = environment("flecsi-sp")
 
     def ci_message(self, args):
